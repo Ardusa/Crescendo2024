@@ -21,9 +21,9 @@ public class LoggyThingManager {
     /**
      * Starts a log file
      */
-    LoggyThingManager() {
+    private LoggyThingManager() {
         System.out.println("Loggy Thing Manager Initialized");
-        DataLogManager.start();
+        // DataLogManager.start();
         DriverStation.startDataLog(DataLogManager.getLog(), true);
     }
 

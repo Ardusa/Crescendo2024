@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,11 +22,14 @@ import frc.robot.autos.pathPlannerChooser;
 public class Robot extends TimedRobot {
 	private Command mAutonomousCommand;
 	private SendableChooser<String> mChooser = new SendableChooser<>();
+	public static Field2d mField = new Field2d();
 
 	private final boolean UseLimelight = false;
 
 	@Override
 	public void robotInit() {
+		DataLogManager.start("WPILog", "", 1);
+		SmartDashboard.putData("Field", mField);
 		new RobotContainer();
 		DriverStation.silenceJoystickConnectionWarning(true);
 
@@ -72,6 +76,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
+		// mAutonomousCommand = new pathPlannerCommand(mChooser.getSelected(), true);
 		mAutonomousCommand = new pathPlannerChooser(mChooser.getSelected()).generateTrajectory();
 
 		if (mAutonomousCommand != null) {

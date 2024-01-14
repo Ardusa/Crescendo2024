@@ -251,7 +251,7 @@ public interface ILoggyMotor {
      * 
      * @param logLevel a list of {@link LogItem} that will be logged each period
      */
-    default void setLogLevel(EnumSet<LogItem> logLevel) {// constructs all added log entries
+    default void setLogLevel(EnumSet<LogItem> logLevel) {
         DataLogManager.log("LoggyMotor " + getLogPath() + " log levels set to " + logLevel.toString());
         EnumSet<LogItem> lastLogSet = EnumSet.copyOf(getLogLevel());
         setLogLevel_internal(logLevel);

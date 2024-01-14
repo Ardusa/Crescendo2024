@@ -1,89 +1,89 @@
-// package frc.robot.Subsystems.Shooter;
+package frc.robot.Subsystems.Shooter;
 
-// import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
-// import edu.wpi.first.wpilibj2.command.SubsystemBase;
-// import frc.robot.Constants;
-// import frc.robot.Robot;
-// import frc.robot.Custom.LoggyThings.LoggyTalonFX;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.Commands.Shooter.Intake;
+import frc.robot.Custom.LoggyThings.LoggyTalonFX;
 
-// public class Shooter extends SubsystemBase {
-//     private static Shooter mInstance;
-//     private LoggyTalonFX beltMotor;
+public class Shooter extends SubsystemBase {
+    private static Shooter mInstance;
+    private LoggyTalonFX beltMotorRight, beltMotorLeft;
 
-//     public enum Target {
-//         kSpeaker,
-//         kAmp,
-//         None
-//     }
+    public enum Target {
+        kSpeaker,
+        kAmp,
+        None
+    }
 
-//     private boolean holding;
+    private boolean holding;
 
-//     public static Shooter getInstance() {
-//         if (mInstance == null) {
-//             mInstance = new Shooter();
-//         }
+    public static Shooter getInstance() {
+        if (mInstance == null) {
+            mInstance = new Shooter();
+        }
 
-//         return mInstance;
-//     }
+        return mInstance;
+    }
 
-//     private Shooter() {
-//         beltMotor = new LoggyTalonFX(Constants.BeltConstants.beltMotorID, false);
-//         beltMotor.setNeutralMode(NeutralModeValue.Brake);
-//         holding = false;
-//     }
+    private Shooter() {
+        beltMotorRight = new LoggyTalonFX(61, true);
+        beltMotorLeft = new LoggyTalonFX(60, true);
+        beltMotorRight.setNeutralMode(NeutralModeValue.Coast);
+        beltMotorLeft.setNeutralMode(NeutralModeValue.Coast);
+        // beltMotorLeft.setControl(new Follower(beltMotorRight.getDeviceID(), false));
+        holding = false;
+    }
 
-//     public void intakeSpeed(double speed) {
-//         if (!Constants.BeltConstants.intakeIsPositive) {
-//             speed = -speed;
-//         }
+    public void intakeSpeed(double speed) {
+        beltMotorRight.set(-speed);
+    }
 
-//         beltMotor.set(speed);
-//     }
+    public void intake() {
+        beltMotorRight.set(Constants.BeltConstants.kBeltIntakeSpeed);
+    }
 
-//     public void intake() {
-//         beltMotor.set(Constants.BeltConstants.kBeltIntakeSpeed);
-//     }
+    public void shoot(double speed, double speed2) {
+        beltMotorRight.set(speed);
+        beltMotorLeft.set(speed2);
+        setHolding(false);
+        SmartDashboard.putNumber("Left Power", speed);
+        SmartDashboard.putNumber("Right Power", speed2);
+    }
 
-//     public void shoot(double speed) {
-//         if (Constants.BeltConstants.intakeIsPositive) {
-//             speed = -speed;
-//         }
+    public void stop() {
+        beltMotorRight.set(0);
+    }
 
-//         beltMotor.set(speed);
-//     }
+    public void setHolding(boolean hold) {
+        holding = hold;
+    }
 
-//     public void stop() {
-//         beltMotor.set(0);
-//     }
+    public void toggleHolding() {
+        holding = !holding;
+    }
 
-//     public void setHolding(boolean hold) {
-//         holding = hold;
-//     }
+    public boolean getHolding() {
+        return false;
+    }
 
-//     public void toggleHolding() {
-//         holding = !holding;
-//     }
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Velocity Left Belt", beltMotorRight.getVelocity().getValue());
+        SmartDashboard.putNumber("Velocity Right Belt", beltMotorLeft.getVelocity().getValue());
+        SmartDashboard.putNumber("Spin Delta Belt",
+            beltMotorLeft.getVelocity().getValue() - beltMotorRight.getVelocity().getValue());
 
-//     public boolean getHolding() {
-//         return holding;
-//     }
-
-//     @Override
-//     public void periodic() {
-//         if (!(Math.abs(beltMotor.get()) < 0.01) && Robot.isReal()) {
-
-//             System.out.println("Belt velocity" + beltMotor.getVelocity().getValue());
-//             System.out.println("Belt speed" + beltMotor.get());
-
-//             if (beltMotor.get() == Constants.BeltConstants.kBeltIntakeSpeed
-//                     && beltMotor.getVelocity().getValue() < (Constants.BeltConstants.kBeltIntakeVelocity * 0.8)) {
-//                 setHolding(true);
-//                 stop();
-//             }
-//         }
-//         if (beltMotor.get() == Constants.BeltConstants.kBeltSpeedSpeaker || beltMotor.get() == Constants.BeltConstants.kBeltSpeedAmp) {
-//             setHolding(false);
-//         }
-//     }
-// }
+        if (getCurrentCommand() instanceof Intake) {
+            if (beltMotorLeft.get() * Constants.BeltConstants.kBeltIntakeVelocityMax > beltMotorLeft.getVelocity()
+                    .getValue() + Constants.BeltConstants.beltBufferVelocity && Robot.isReal()) {
+                setHolding(true);
+                stop();
+            }
+        }
+    }
+}

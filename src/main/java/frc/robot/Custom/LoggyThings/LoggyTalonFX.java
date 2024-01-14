@@ -279,7 +279,7 @@ public class LoggyTalonFX extends TalonFX implements ILoggyMotor {
     // public StatusCode
 
     /**
-     * configre TalonFX slot
+     * configre TalonFX slot, 🚨 do not pass in {@link Slot1Configs} for swerve motors 🚨
      * 
      * @param config you can pass in a {@link Slot0Configs}, {@link Slot1Configs},
      *               {@link Slot2Configs}, or {@link TalonFXConfiguration
@@ -299,11 +299,6 @@ public class LoggyTalonFX extends TalonFX implements ILoggyMotor {
             return StatusCode.ConfigFailed;
         }
     }
-
-    // @Override
-    // public StatusCode set(ControlRequest req) {
-    // super.get()
-    // }
 
     @Override
     public void setVoltage(double outputVolts) {

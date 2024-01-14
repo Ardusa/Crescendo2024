@@ -668,6 +668,13 @@ public class Utils {
         return Constants.CustomDeadzone.kNoSpeed;
     }
 
+    public static boolean withinRange(double input, double range) {
+        if (input >= -range && input <= range) {
+            return true;
+        }
+        return false;
+    }
+
     public static double pythagorean(double a, double b) {
         return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
     }

@@ -4,24 +4,21 @@
       "/FMSInfo": "FMSInfo",
       "/Pose": "Field2d",
       "/SmartDashboard/Auton Chooser": "String Chooser",
+      "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Mechanism": "Mechanism2d",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
       "/SmartDashboard/Module 2": "Mechanism2d",
-      "/SmartDashboard/Module 3": "Mechanism2d"
+      "/SmartDashboard/Module 3": "Mechanism2d",
+      "/SmartDashboard/path": "Field2d"
     },
     "windows": {
-      "/Pose": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/Auton Chooser": {
         "window": {
           "visible": true
         }
       },
-      "/SmartDashboard/Mechanism": {
+      "/SmartDashboard/Field": {
         "window": {
           "visible": true
         }
@@ -45,6 +42,9 @@
         "open": true
       },
       "SmartDashboard": {
+        "Field": {
+          "open": true
+        },
         "Mechanism": {
           "Root": {
             "open": true
@@ -57,7 +57,10 @@
           },
           "open": true
         },
-        "open": true
+        "open": true,
+        "path": {
+          "open": true
+        }
       }
     }
   }

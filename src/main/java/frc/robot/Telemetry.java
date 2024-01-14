@@ -22,24 +22,25 @@ import frc.robot.Subsystems.Swerve.SwerveDrivetrain.SwerveDriveState;
 public class Telemetry {
     private final double MaxSpeed;
 
-    public Field2d field = new Field2d();
+    public Field2d field;
     /**
      * Construct a telemetry object, with the specified max speed of the robot
      * 
      * @param maxSpeed Maximum speed in meters per second
      */
-    public Telemetry(double maxSpeed) {
-        MaxSpeed = maxSpeed;
+    public Telemetry() {
+        MaxSpeed = Constants.SwerveConstants.kMaxSpeedMetersPerSecond;
         SignalLogger.start();
+        field = (Field2d) SmartDashboard.getData("Field");
     }
 
     /* What to publish over networktables for telemetry */
     private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
 
     /* Robot pose for field positioning */
-    private final NetworkTable table = inst.getTable("Pose");
-    private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
-    private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
+    // private final NetworkTable table = inst.getTable("Pose");
+    // private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
+    // private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
 
     /* Robot speeds for general checking */
     private final NetworkTable driveStats = inst.getTable("Drive");
@@ -82,14 +83,14 @@ public class Telemetry {
     public void telemeterize(SwerveDriveState state) {
         /* Telemeterize the pose */
         Pose2d pose = state.Pose;
-        fieldTypePub.set("Field2d");
-        fieldPub.set(new double[] {
-            pose.getX(),
-            pose.getY(),
-            pose.getRotation().getDegrees()
-        });
+        // fieldTypePub.set("Field2d");
+        // fieldPub.set(new double[] {
+        //     pose.getX(),
+        //     pose.getY(),
+        //     pose.getRotation().getDegrees()
+        // });
+        field.setRobotPose(pose);
 
-        
         /* Telemeterize the robot's general speeds */
         double currentTime = Utils.getCurrentTimeSeconds();
         double diffTime = currentTime - lastTime;
@@ -103,7 +104,7 @@ public class Telemetry {
         velocityY.set(velocities.getY());
         odomFreq.set(1.0 / state.OdometryPeriod);
         
-        Swerve.getInstance().mField.setRobotPose(pose);
+        Swerve.getInstance().getField().setRobotPose(pose);
         
         /* Telemeterize the module's states */
         for (int i = 0; i < 4; ++i) {

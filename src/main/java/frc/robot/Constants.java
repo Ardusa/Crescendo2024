@@ -15,18 +15,20 @@ import edu.wpi.first.math.util.Units;
 //0.42545 + 0.254/2
 
 public final class Constants {
-	/** Should be 16.6 */
+	/** Should be 16.54 */
 	public static final double fieldLength = Units.inchesToMeters(76.1 + 250.5) * 2;
+	public static final double fieldHeight = 8.21;
 
 	public static final double kRange = 20;
 
 	public class SwerveConstants {
-		// TODO: Both sets of gains need to be tuned to your individual robot.
+		public static final double kMaxSpeedMetersPerSecond = 6;
+		public static final double kMaxAngularSpeedMetersPerSecond = 5 * Math.PI;
 
 		// The steer motor uses any SwerveModule.SteerRequestType control request with
 		// the output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
 		private static final Slot0Configs steerGains = new Slot0Configs()
-				.withKP(100).withKI(0).withKD(0.05)
+				.withKP(100).withKI(0).withKD(0.2)
 				.withKS(0).withKV(1.5).withKA(0);
 		// When using closed-loop control, the drive motor uses the control
 		// output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -42,21 +44,19 @@ public final class Constants {
 		private static final ClosedLoopOutputType driveClosedLoopOutput = ClosedLoopOutputType.Voltage;
 
 		// The stator current at which the wheels start to slip;
-		// TODO: This needs to be tuned to your individual robot
 		private static final double kSlipCurrentA = 300.0;
 
 		// Theoretical free speed (m/s) at 12v applied output;
-		// TODO: This needs to be tuned to your individual robot
-		public static final double kSpeedAt12VoltsMps = 5.0;
+		public static final double kSpeedAt12VoltsMps = 5.13;
 
 		// Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
-		// TODO: This may need to be tuned to your individual robot
-		private static final double kCoupleRatio = 3.5;
+		private static final double kCoupleRatio = 3.5714285714285716;
 
-		private static final double kDriveGearRatio = 7.363636364;
-		private static final double kSteerGearRatio = 15.42857143;
-		private static final double kWheelRadiusInches = 2.167; // Estimated at first, then fudge-factored to make odom
-																// match record
+    	private static final double kDriveGearRatio = 6.746031746031747;
+    	private static final double kSteerGearRatio = 21.428571428571427;
+    	private static final double kWheelRadiusInches = 4;
+		// Estimated at first, then fudge-factored to make odom
+		// match record
 
 		private static final boolean kSteerMotorReversed = true;
 		private static final boolean kInvertLeftSide = false;
@@ -87,14 +87,14 @@ public final class Constants {
 				.withCouplingGearRatio(kCoupleRatio)
 				.withSteerMotorInverted(kSteerMotorReversed);
 
-		/* Picture the robot facing to the right in the XY graph */
+		/* Picture the front of the robot facing to the right in the XY axis */
 
-		/** X value */
-		public static final double driveBaseWidth = 30;
-		/** Y value */
-		public static final double driveBaseHeight = 30;
+		/** Distance between the 2 right side CANcoders */
+		public static final double driveBaseWidth = 24.5;
+		/** Distance between the 2 front side CANcoders */
+		public static final double driveBaseHeight = 24;
 
-		/** distance from the center of the robot to the furthest module (meters) */
+		/** distance from the center of the robot to the furthest module (meters) should be 34.3 */
 		public static final double driveBaseRadius = Utils.pythagorean(driveBaseWidth / 2, driveBaseHeight / 2);
 
 		private static final String kCANbusName = "*";
@@ -105,34 +105,34 @@ public final class Constants {
 
 
 		// Front Left
-		private static final int kFrontLeftDriveMotorId = 01;
-		private static final int kFrontLeftSteerMotorId = 02;
-		private static final int kFrontLeftEncoderId = 03;
-		private static final double kFrontLeftEncoderOffset = -0.83544921875;
+		private static final int kFrontLeftDriveMotorId = 12;
+		private static final int kFrontLeftSteerMotorId = 11;
+		private static final int kFrontLeftEncoderId = 10;
+		private static final double kFrontLeftEncoderOffset = -0.49658203125;
 		private static final double kFrontLeftXPosInches = driveBaseWidth / 2;
 		private static final double kFrontLeftYPosInches = driveBaseHeight / 2;
 
 		// Front Right
-		private static final int kFrontRightDriveMotorId = 11;
-		private static final int kFrontRightSteerMotorId = 12;
-		private static final int kFrontRightEncoderId = 13;
-		private static final double kFrontRightEncoderOffset = -0.15234375;
+		private static final int kFrontRightDriveMotorId = 22;
+		private static final int kFrontRightSteerMotorId = 21;
+		private static final int kFrontRightEncoderId = 20;
+		private static final double kFrontRightEncoderOffset = 0.442138671875;
 		private static final double kFrontRightXPosInches = driveBaseWidth / 2;
 		private static final double kFrontRightYPosInches = -driveBaseHeight / 2;
 
 		// Back Left
-		private static final int kBackLeftDriveMotorId = 21;
-		private static final int kBackLeftSteerMotorId = 22;
-		private static final int kBackLeftEncoderId = 23;
-		private static final double kBackLeftEncoderOffset = -0.4794921875;
+		private static final int kBackLeftDriveMotorId = 32;
+		private static final int kBackLeftSteerMotorId = 31;
+		private static final int kBackLeftEncoderId = 30;
+		private static final double kBackLeftEncoderOffset = -0.34814453125;
 		private static final double kBackLeftXPosInches = -driveBaseWidth / 2;
 		private static final double kBackLeftYPosInches = driveBaseHeight;
 
 		// Back Right
-		private static final int kBackRightDriveMotorId = 31;
-		private static final int kBackRightSteerMotorId = 32;
-		private static final int kBackRightEncoderId = 33;
-		private static final double kBackRightEncoderOffset = -0.84130859375;
+		private static final int kBackRightDriveMotorId = 52;
+		private static final int kBackRightSteerMotorId = 51;
+		private static final int kBackRightEncoderId = 40;
+		private static final double kBackRightEncoderOffset = -0.076171875;
 		private static final double kBackRightXPosInches = -driveBaseWidth / 2;
 		private static final double kBackRightYPosInches = -driveBaseHeight / 2;
 
@@ -189,6 +189,9 @@ public final class Constants {
 		public static final double kPYController = 10;
 		public static final double kPThetaController = 1;
 
+		public static final double intakeBeltOnTimeSeconds = 0.5;
+		public static final double intakeDeployTimeSeconds = 0.5;
+
 		/* Constraint for the motion profilied robot angle controller */
 		public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
 				kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
@@ -213,6 +216,9 @@ public final class Constants {
 
 	public static class OperatorConstants {
 		public static final int kDriverControllerPort = 0;
+
+		public static final double deadband = SwerveConstants.kMaxSpeedMetersPerSecond * 0.05;
+		public static final double rotationalDeadband = SwerveConstants.kMaxAngularSpeedMetersPerSecond * 0.05;
 	}
 
 	public static class BeltConstants {
@@ -225,9 +231,11 @@ public final class Constants {
 
 		public static final double kBeltVelocitySpeaker = 1;
 		public static final double kBeltVelocityAmp = 0.2;
-		public static final double kBeltIntakeVelocity = 0.2;
-		public static final double kBeltFeedForward = 0.1;
+		public static final double kBeltIntakeVelocityMax = 94;
+		public static final double kBeltIntakeVelocity20Percent = 94 * 0.2;
+		public static final double kBeltFeedForward = 0.05;
 
+		public static final double beltBufferVelocity = 10;
 	}
 
 	public static class ArmConstants {
