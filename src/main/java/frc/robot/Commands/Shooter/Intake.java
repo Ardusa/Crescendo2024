@@ -1,7 +1,5 @@
 package frc.robot.Commands.Shooter;
 
-import com.ctre.phoenix6.StatusSignal;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 // import frc.robot.Subsystems.Shooter.Arm;
@@ -19,6 +17,13 @@ public class Intake extends Command {
         this.addRequirements(mBelt);
         thingy = thing;
         thingy2 = thing2;
+    }
+
+    public Intake() {
+        this.setName("Simple Intake");
+        this.addRequirements(mBelt);
+        thingy = () -> Constants.BeltConstants.kBeltIntakeSpeed;
+        thingy2 = () -> Constants.BeltConstants.kBeltIntakeSpeed;
     }
 
     @Override

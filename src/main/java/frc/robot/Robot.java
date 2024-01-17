@@ -17,14 +17,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Subsystems.Swerve.Swerve;
-import frc.robot.autos.pathPlannerChooser;
+import frc.robot.autos.pathPlannerCommand;
 
 public class Robot extends TimedRobot {
 	private Command mAutonomousCommand;
 	private SendableChooser<String> mChooser = new SendableChooser<>();
 	public static Field2d mField = new Field2d();
-
-	private final boolean UseLimelight = false;
 
 	@Override
 	public void robotInit() {
@@ -45,15 +43,16 @@ public class Robot extends TimedRobot {
 				.onCommandInitialize((action) -> DataLogManager.log("Intializing " + action.getName()));
 		CommandScheduler.getInstance()
 				.onCommandInterrupt((action) -> DataLogManager.log("Interrupting " + action.getName()));
-		CommandScheduler.getInstance().onCommandFinish((action) -> DataLogManager.log("Finished " + action.getName()));
+		CommandScheduler.getInstance()
+				.onCommandFinish((action) -> DataLogManager.log("Finished " + action.getName()));
 	}
 
 	@Override
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
-		if (UseLimelight) {
+		if (Constants.UseLimelight) {
+			
 			var lastResult = LimelightHelpers.getLatestResults("limelight").targetingResults;
-
 			Pose2d llPose = lastResult.getBotPose2d_wpiBlue();
 
 			if (lastResult.valid) {
@@ -76,8 +75,9 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
-		// mAutonomousCommand = new pathPlannerCommand(mChooser.getSelected(), true);
-		mAutonomousCommand = new pathPlannerChooser(mChooser.getSelected()).generateTrajectory();
+		mAutonomousCommand = new pathPlannerCommand(mChooser.getSelected(), true);
+		// mAutonomousCommand = new
+		// pathPlannerChooser(mChooser.getSelected()).generateTrajectory();
 
 		if (mAutonomousCommand != null) {
 			mAutonomousCommand.schedule();
@@ -122,5 +122,9 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void simulationPeriodic() {
+	}
+
+	@Override
+	public void simulationInit() {
 	}
 }

@@ -12,7 +12,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerTrajectory;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -24,7 +23,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Constants.SwerveConstants;
 
 /**
@@ -33,6 +31,8 @@ import frc.robot.Constants.SwerveConstants;
  * so it can be used in command-based projects easily.
  */
 public class Swerve extends SwerveDrivetrain implements Subsystem {
+    // private StringPublisher currCmdPub, defCmdPub;
+    // private DoubleArrayPublisher posePub;
     private static Swerve mInstance;
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
@@ -64,16 +64,14 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        
-        mField = (Field2d) SmartDashboard.getData("Field");
 
+        mField = (Field2d) SmartDashboard.getData("Field");
     }
 
     private void configurePathPlanner() {
-        double driveBaseRadius = 0;
-        for (var moduleLocation : m_moduleLocations) {
-            driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
-        }
+        // for (var moduleLocation : m_moduleLocations) {
+        // driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
+        // }
 
         AutoBuilder.configureHolonomic(
                 () -> this.getState().Pose, // Supplier of current robot pose
@@ -81,16 +79,17 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                 this::getCurrentRobotChassisSpeeds,
                 (speeds) -> this.setControl(autoRequest.withSpeeds(speeds)), // Consumer of ChassisSpeeds to drive the
                                                                              // robot
-                new HolonomicPathFollowerConfig(new PIDConstants(10, 0, 0),
-                        new PIDConstants(10, 0, 0),
-                        SwerveConstants.kSpeedAt12VoltsMps,
-                        driveBaseRadius,
+                new HolonomicPathFollowerConfig(
+                        Constants.AutoConstants.translationPID,
+                        Constants.AutoConstants.rotationPID,
+                        SwerveConstants.kSpeedAt12VoltsMetersPerSecond,
+                        Constants.SwerveConstants.driveBaseRadius,
                         new ReplanningConfig()),
                 this); // Subsystem for requirements
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-        return run(() -> this.setControl(requestSupplier.get()));
+        return run(() -> this.setControl(requestSupplier.get())).withName("xDrive");
     }
 
     public Command getAutoPath(String pathName) {
@@ -146,4 +145,50 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public Field2d getField() {
         return mField;
     }
+
+    public Pose2d getPose() {
+        return getState().Pose;
+    }
+
+    @Override
+    public void periodic() {
+        try {
+            SmartDashboard.putString("Swerve/Default Command", this.getDefaultCommand().getName());
+        } catch (NullPointerException e) {
+            SmartDashboard.putString("Swerve/Default Command", "empty");
+        }
+        try {
+            SmartDashboard.putString("Swerve/Current Command", this.getCurrentCommand().getName());
+        } catch (NullPointerException e) {
+            SmartDashboard.putString("Current Command", "empty");
+        }
+
+        SmartDashboard.putNumberArray("Swerve/Pose", new double[] {
+                getPose().getX(),
+                getPose().getY(),
+                getPose().getRotation().getDegrees()
+        });
+
+        // SmartDashboard.putString("Current Command",
+        // this.getCurrentCommand().toString() != null ?
+        // this.getCurrentCommand().toString() : "empty");
+    }
+
+    // @Override
+    // public void initSendable(SendableBuilder builder) {
+    // builder.setSmartDashboardType("Subsystem");
+
+    // builder.addBooleanProperty(".hasDefault", () -> getDefaultCommand() != null,
+    // null);
+    // builder.addStringProperty(
+    // ".default",
+    // () -> getDefaultCommand() != null ? getDefaultCommand().getName() : "none",
+    // null);
+    // builder.addBooleanProperty(".hasCommand", () -> getCurrentCommand() != null,
+    // null);
+    // builder.addStringProperty(
+    // ".command",
+    // () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "none",
+    // null);
+    // }
 }

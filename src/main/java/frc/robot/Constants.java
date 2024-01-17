@@ -6,6 +6,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstantsFactory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
+import com.pathplanner.lib.util.PIDConstants;
 
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -20,6 +21,8 @@ public final class Constants {
 	public static final double fieldHeight = 8.21;
 
 	public static final double kRange = 20;
+
+	public static final boolean UseLimelight = false;
 
 	public class SwerveConstants {
 		public static final double kMaxSpeedMetersPerSecond = 6;
@@ -47,14 +50,14 @@ public final class Constants {
 		private static final double kSlipCurrentA = 300.0;
 
 		// Theoretical free speed (m/s) at 12v applied output;
-		public static final double kSpeedAt12VoltsMps = 5.13;
+		public static final double kSpeedAt12VoltsMetersPerSecond = 5.13;
 
 		// Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
 		private static final double kCoupleRatio = 3.5714285714285716;
 
-    	private static final double kDriveGearRatio = 6.746031746031747;
-    	private static final double kSteerGearRatio = 21.428571428571427;
-    	private static final double kWheelRadiusInches = 4;
+		private static final double kDriveGearRatio = 6.746031746031747;
+		private static final double kSteerGearRatio = 21.428571428571427;
+		private static final double kWheelRadiusInches = 4;
 		// Estimated at first, then fudge-factored to make odom
 		// match record
 
@@ -78,7 +81,7 @@ public final class Constants {
 				.withDriveMotorGains(driveGains)
 				.withSteerMotorClosedLoopOutput(steerClosedLoopOutput)
 				.withDriveMotorClosedLoopOutput(driveClosedLoopOutput)
-				.withSpeedAt12VoltsMps(kSpeedAt12VoltsMps)
+				.withSpeedAt12VoltsMps(kSpeedAt12VoltsMetersPerSecond)
 				.withSteerInertia(kSteerInertia)
 				.withDriveInertia(kDriveInertia)
 				.withSteerFrictionVoltage(kSteerFrictionVoltage)
@@ -94,7 +97,10 @@ public final class Constants {
 		/** Distance between the 2 front side CANcoders */
 		public static final double driveBaseHeight = 24;
 
-		/** distance from the center of the robot to the furthest module (meters) should be 34.3 */
+		/**
+		 * distance from the center of the robot to the furthest module (meters) should
+		 * be 34.3
+		 */
 		public static final double driveBaseRadius = Utils.pythagorean(driveBaseWidth / 2, driveBaseHeight / 2);
 
 		private static final String kCANbusName = "*";
@@ -102,7 +108,6 @@ public final class Constants {
 		public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
 				.withPigeon2Id(kPigeonId)
 				.withCANbusName(kCANbusName);
-
 
 		// Front Left
 		private static final int kFrontLeftDriveMotorId = 12;
@@ -155,6 +160,41 @@ public final class Constants {
 				kInvertRightSide);
 	}
 
+	public enum AprilTag {
+		NoTag(-1),
+		BlueRightHumanPlayer(1),
+		BlueLeftHumanPlayer(2),
+		RedSpeakerOffset(3),
+		RedSpeaker(4),
+		RedAmp(5),
+		BlueAmp(6),
+		BlueSpeaker(7),
+		BlueSpeakerOffset(8),
+		RedRightHumanPlayer(9),
+		RedLeftHumanPlayer(10),
+		RedLeftStage(11),
+		RedRightStage(12),
+		RedCenterStage(13),
+		BlueCenterStage(14),
+		BlueLeftStage(15),
+		BlueRightStage(16);
+
+		public final int id;
+
+		private AprilTag(int id) {
+			this.id = id;
+		}
+
+		public static AprilTag fromId(int id) {
+			for (AprilTag tag : AprilTag.values()) {
+				if (tag.id == id) {
+					return tag;
+				}
+			}
+			return NoTag;
+		}
+	}
+
 	public static class CustomDeadzone {
 
 		public static final double kLowerLimitExpFunc = 0.1;
@@ -180,6 +220,8 @@ public final class Constants {
 				Constants.AutoConstants.kMaxSpeedMetersPerSecond,
 				Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
 
+		public static final PIDConstants translationPID = new PIDConstants(10, 0, 0);
+		public static final PIDConstants rotationPID = new PIDConstants(10, 0, 0);
 		public static final double kMaxSpeedMetersPerSecond = 3;
 		public static final double kMaxAccelerationMetersPerSecondSquared = 5;
 		public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
@@ -204,8 +246,9 @@ public final class Constants {
 
 		/* Kraken x60 Info */
 		public static class Kraken {
-			public static final double krakenFreeSpeedRPM = 5800.0;
-			public static final double krakenFreeSpeedRadPerSec = krakenFreeSpeedRPM * 2 * Math.PI / 60;
+			public static final double krakenFreeSpeedRotationPerMinute = 5800.0;
+			public static final double krakenFreeSpeedRadiansPerSecond = krakenFreeSpeedRotationPerMinute * 2 * Math.PI
+					/ 60;
 			public static final double krakenStallTorqueNM = 9.37;
 			public static final double krakenStallCurrentAmps = 483;
 			public static final double krakenPeakPowerWatts = 1405;
@@ -222,7 +265,8 @@ public final class Constants {
 	}
 
 	public static class BeltConstants {
-		public static final int beltMotorID = 0;
+		public static final int beltMotorLeft = 60;
+		public static final int beltMotorRight = 61;
 		public static final boolean intakeIsPositive = true;
 
 		public static final double kBeltSpeedSpeaker = 1;
@@ -239,8 +283,8 @@ public final class Constants {
 	}
 
 	public static class ArmConstants {
-		public static final int armMotorID = 0;
-		public static final int armEncoderID = 0;
+		public static final int armMotorID = 60;
+		public static final int armEncoderID = 61;
 
 		public static final double kFeedForward = 0.5;
 

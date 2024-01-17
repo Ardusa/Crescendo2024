@@ -7,9 +7,12 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.Shooter.Intake;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
@@ -19,7 +22,8 @@ public class RobotContainer {
 
 	/* Setting up bindings for necessary control of the swerve drive platform */
 	private final CommandXboxController xDrive = new CommandXboxController(0);
-	private final CommandXboxController manip = new CommandXboxController(1);
+	// private final CommandXboxController manip = new CommandXboxController(1);
+	private final GenericHID simController = new GenericHID(3);
 
 	private final Swerve drivetrain = Swerve.getInstance();
 	// public final Arm arm = Arm.getInstance();
@@ -38,12 +42,13 @@ public class RobotContainer {
 
 	private void configureBindings() {
 		drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-				drivetrain.applyRequest(() -> drive.withVelocityX(-xDrive.getLeftY() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond) // Drive forward with
-																									// negative Y
-																									// (forward)
-						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond) // Drive left with negative X (left)
-						.withRotationalRate(-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond) // Drive counterclockwise with
-																					// negative X (left)
+				drivetrain.applyRequest(() -> drive
+						.withVelocityX(-xDrive.getLeftY() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+						.withRotationalRate(
+								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
+
+				// negative X (left)
 				).ignoringDisable(true));
 
 		xDrive.a().whileTrue(drivetrain.applyRequest(() -> brake));
@@ -62,16 +67,16 @@ public class RobotContainer {
 		xDrive.pov(180).whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(-0.5).withVelocityY(0)));
 
 		// arm.setDefaultCommand(
-		// 	new FineAdjust(() -> manip.getLeftY())
+		// new FineAdjust(() -> manip.getLeftY())
 		// );
-				
+
 		belt.setDefaultCommand(
-			new Intake(() -> xDrive.getLeftTriggerAxis(), () -> xDrive.getRightTriggerAxis())
-		);
+				new Intake(() -> xDrive.getLeftTriggerAxis(), () -> xDrive.getRightTriggerAxis()));
 
-
-		// xDrive.leftTrigger(0.1).whileTrue(new Intake(() -> -xDrive.getLeftTriggerAxis()));
-		// xDrive.rightTrigger(0.1).whileTrue(new Intake(() -> xDrive.getRightTriggerAxis()));
+		// xDrive.leftTrigger(0.1).whileTrue(new Intake(() ->
+		// -xDrive.getLeftTriggerAxis()));
+		// xDrive.rightTrigger(0.1).whileTrue(new Intake(() ->
+		// xDrive.getRightTriggerAxis()));
 
 		// xDrive.leftTrigger()
 
@@ -80,6 +85,19 @@ public class RobotContainer {
 		// manip.x().whileTrue(new Intake());
 		// manip.y().whileTrue(new Shoot());
 
+		/* Set Sim Binds */
+		drivetrain.setDefaultCommand(
+				drivetrain.applyRequest(() -> drive.withVelocityX(simController.getRawAxis(0))
+						.withVelocityY(simController.getRawAxis(1)).withRotationalRate(simController.getRawAxis(2))));
+
+		new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
+				drivetrain.applyRequest(() -> brake));
+
+		new Trigger(() -> simController.getRawButtonPressed(2)).onTrue(
+				new InstantCommand(() -> drivetrain.seedFieldRelative()));
+
+		new Trigger(() -> simController.getRawButtonPressed(3)).whileTrue(
+				drivetrain.applyRequest(() -> drive.withVelocityX(1).withVelocityY(1)));
 	}
 
 	public RobotContainer() {
@@ -91,7 +109,7 @@ public class RobotContainer {
 	public Command getAutonomousCommand() {
 		/* First put the drivetrain into auto run mode, then run the auto */
 		/* Path follower, Autobuilder already configured */
-		Command runAuto = drivetrain.getAutoPath("Tests");
+		// Command runAuto = drivetrain.getAutoPath("Tests");
 
 		return new PrintCommand("No auto loaded");
 	}

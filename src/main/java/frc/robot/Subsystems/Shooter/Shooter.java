@@ -1,6 +1,5 @@
 package frc.robot.Subsystems.Shooter;
 
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,8 +30,8 @@ public class Shooter extends SubsystemBase {
     }
 
     private Shooter() {
-        beltMotorRight = new LoggyTalonFX(61, true);
-        beltMotorLeft = new LoggyTalonFX(60, true);
+        beltMotorRight = new LoggyTalonFX(Constants.BeltConstants.beltMotorRight, true);
+        beltMotorLeft = new LoggyTalonFX(Constants.BeltConstants.beltMotorLeft, true);
         beltMotorRight.setNeutralMode(NeutralModeValue.Coast);
         beltMotorLeft.setNeutralMode(NeutralModeValue.Coast);
         // beltMotorLeft.setControl(new Follower(beltMotorRight.getDeviceID(), false));
@@ -55,12 +54,16 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Right Power", speed2);
     }
 
+    public void shoot(double speed) {
+        shoot(speed, speed);
+    }
+
     public void stop() {
         beltMotorRight.set(0);
     }
 
-    public void setHolding(boolean hold) {
-        holding = hold;
+    public void setHolding(boolean holding) {
+        this.holding = holding;
     }
 
     public void toggleHolding() {
@@ -68,16 +71,18 @@ public class Shooter extends SubsystemBase {
     }
 
     public boolean getHolding() {
-        return false;
+        return holding;
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Velocity Left Belt", beltMotorRight.getVelocity().getValue());
-        SmartDashboard.putNumber("Velocity Right Belt", beltMotorLeft.getVelocity().getValue());
-        SmartDashboard.putNumber("Spin Delta Belt",
-            beltMotorLeft.getVelocity().getValue() - beltMotorRight.getVelocity().getValue());
-
+        if (Robot.isReal()) {
+            SmartDashboard.putNumber("Velocity Left Belt", beltMotorRight.getVelocity().getValue());
+            SmartDashboard.putNumber("Velocity Right Belt", beltMotorLeft.getVelocity().getValue());
+            SmartDashboard.putNumber("Spin Delta Belt",
+                    beltMotorLeft.getVelocity().getValue() - beltMotorRight.getVelocity().getValue());
+        }
+        
         if (getCurrentCommand() instanceof Intake) {
             if (beltMotorLeft.get() * Constants.BeltConstants.kBeltIntakeVelocityMax > beltMotorLeft.getVelocity()
                     .getValue() + Constants.BeltConstants.beltBufferVelocity && Robot.isReal()) {

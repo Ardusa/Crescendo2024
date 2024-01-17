@@ -104,9 +104,9 @@ public class SwerveDrivetrain {
     /* Perform swerve module updates in a separate thread to minimize latency */
     public class OdometryThread {
         protected static final int START_THREAD_PRIORITY = 1; // Testing shows 1 (minimum realtime) is sufficient for tighter
-                                                            // odometry loops.
-                                                            // If the odometry period is far away from the desired frequency,
-                                                            // increasing this may help
+                                                              // odometry loops.
+                                                              // If the odometry period is far away from the desired frequency,
+                                                              // increasing this may help
 
         protected final Thread m_thread;
         protected volatile boolean m_running = false;
@@ -413,11 +413,45 @@ public class SwerveDrivetrain {
      *
      * @param location Pose to make the current pose at.
      */
+    // public void seedFieldRelative(Pose2d location) {
+    //     try {
+    //         m_stateLock.writeLock().lock();
+
+    //         m_odometry.resetPosition(Rotation2d.fromDegrees(m_yawGetter.getValue()), m_modulePositions, location);
+    //         /* We need to update our cached pose immediately so that race conditions don't happen */
+    //         m_cachedState.Pose = location;
+    //     } finally {
+    //         m_stateLock.writeLock().unlock();
+    //     }
+    // }
+
+    public void seedFieldRelative(Pose2d location, Rotation2d rotationOfWheels) {
+        try {
+            m_stateLock.writeLock().lock();
+
+            for (SwerveModulePosition pos : m_modulePositions) {
+                pos.distanceMeters = 0.0;
+                pos.angle = rotationOfWheels;
+            }
+
+            m_odometry.resetPosition(location.getRotation(), m_modulePositions, location);
+            /* We need to update our cached pose immediately so that race conditions don't happen */
+            m_cachedState.Pose = location;
+        } finally {
+            m_stateLock.writeLock().unlock();
+        }
+    }
+
     public void seedFieldRelative(Pose2d location) {
         try {
             m_stateLock.writeLock().lock();
 
-            m_odometry.resetPosition(Rotation2d.fromDegrees(m_yawGetter.getValue()), m_modulePositions, location);
+            for (SwerveModulePosition pos : m_modulePositions) {
+                pos.distanceMeters = 0.0;
+                pos.angle = location.getRotation();
+            }
+
+            m_odometry.resetPosition(location.getRotation(), m_modulePositions, location);
             /* We need to update our cached pose immediately so that race conditions don't happen */
             m_cachedState.Pose = location;
         } finally {
@@ -611,7 +645,6 @@ public class SwerveDrivetrain {
     public void updateSimState(double dtSeconds, double supplyVoltage) {
         m_simDrive.update(dtSeconds, supplyVoltage, Modules);
     }
-
 
     /**
      * Register the specified lambda to be executed whenever our SwerveDriveState function
