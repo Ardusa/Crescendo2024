@@ -8,8 +8,6 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.ClosedLoopOutputType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackType;
 import com.pathplanner.lib.util.PIDConstants;
 
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 
 //Numbering system for drivetrain: 0 - front right, 1 - front left, 2 - back left, 3 - back right
@@ -215,28 +213,15 @@ public final class Constants {
 	}
 
 	public static final class AutoConstants {
-
-		public static final TrajectoryConfig config = new TrajectoryConfig(
-				Constants.AutoConstants.kMaxSpeedMetersPerSecond,
-				Constants.AutoConstants.kMaxAccelerationMetersPerSecondSquared);
-
 		public static final PIDConstants translationPID = new PIDConstants(10, 0, 0);
 		public static final PIDConstants rotationPID = new PIDConstants(10, 0, 0);
-		public static final double kMaxSpeedMetersPerSecond = 3;
-		public static final double kMaxAccelerationMetersPerSecondSquared = 5;
+		public static final double kMaxSpeedMetersPerSecond = SwerveConstants.kMaxSpeedMetersPerSecond;
 		public static final double kMaxAngularSpeedRadiansPerSecond = Math.PI;
 		public static final double kMaxAngularSpeedRadiansPerSecondSquared = 2 * Math.PI;
 
 		public static final double kPXController = 10;
 		public static final double kPYController = 10;
 		public static final double kPThetaController = 1;
-
-		public static final double intakeBeltOnTimeSeconds = 0.5;
-		public static final double intakeDeployTimeSeconds = 0.5;
-
-		/* Constraint for the motion profilied robot angle controller */
-		public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
-				kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
 
 		public static final String kFieldObjectName = "path";
 	}
@@ -247,8 +232,7 @@ public final class Constants {
 		/* Kraken x60 Info */
 		public static class Kraken {
 			public static final double krakenFreeSpeedRotationPerMinute = 5800.0;
-			public static final double krakenFreeSpeedRadiansPerSecond = krakenFreeSpeedRotationPerMinute * 2 * Math.PI
-					/ 60;
+			public static final double krakenFreeSpeedRadiansPerSecond = krakenFreeSpeedRotationPerMinute * 2 * Math.PI / 60;
 			public static final double krakenStallTorqueNM = 9.37;
 			public static final double krakenStallCurrentAmps = 483;
 			public static final double krakenPeakPowerWatts = 1405;
@@ -262,39 +246,6 @@ public final class Constants {
 
 		public static final double deadband = SwerveConstants.kMaxSpeedMetersPerSecond * 0.1;
 		public static final double rotationalDeadband = SwerveConstants.kMaxAngularSpeedMetersPerSecond * 0.1;
-	}
-
-	public static class BeltConstants {
-		public static final int beltMotorLeft = 60;
-		public static final int beltMotorRight = 61;
-		public static final boolean intakeIsPositive = true;
-
-		public static final double kBeltSpeedSpeaker = 1;
-		public static final double kBeltSpeedAmp = 0.2;
-		public static final double kBeltIntakeSpeed = 0.2;
-
-		public static final double kBeltVelocitySpeaker = 1;
-		public static final double kBeltVelocityAmp = 0.2;
-		public static final double kBeltIntakeVelocityMax = 94;
-		public static final double kBeltIntakeVelocity20Percent = 94 * 0.2;
-		public static final double kBeltFeedForward = 0.05;
-
-		public static final double beltBufferVelocity = 10;
-	}
-
-	public static class ArmConstants {
-		public static final int armMotorID = 60;
-		public static final int armEncoderID = 61;
-
-		public static final double kFeedForward = 0.5;
-
-		public static final double kArmMaxAngle = 0;
-		public static final double kArmMinAngle = 150;
-
-		public static class SetPoints {
-			public static final double kIntakeAngle = 0;
-			public static final double kShootAngle = 30;
-		}
 	}
 
 	public static class Lights {

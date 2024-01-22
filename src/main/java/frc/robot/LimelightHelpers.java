@@ -543,8 +543,8 @@ public class LimelightHelpers {
         return getLimelightNTDoubleArray(limelightName, "tc");
     }
 
-    public static double getTid(String limelightName) {
-        return getLimelightNTDouble(limelightName, "tid");
+    public static int getTid(String limelightName) {
+        return (int) getLimelightNTDouble(limelightName, "tid");
     }
 
     public static double getNeuralClassID(String limelightName) {

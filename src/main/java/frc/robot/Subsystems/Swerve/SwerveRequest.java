@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.robot.Utils;
 
 /**
  * Container for all the Swerve Requests. Use this to find all applicable swerve
@@ -185,7 +184,6 @@ public interface SwerveRequest {
          * @return this request
          */
         public FieldCentric withVelocityX(double velocityX) {
-            // if (Utils.withinRange(velocityX, 0.))
             this.VelocityX = velocityX;
             return this;
         }
