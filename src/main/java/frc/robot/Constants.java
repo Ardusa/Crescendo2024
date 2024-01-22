@@ -22,7 +22,7 @@ public final class Constants {
 
 	public static final double kRange = 20;
 
-	public static final boolean UseLimelight = false;
+	public static final boolean UseLimelight = true;
 
 	public class SwerveConstants {
 		public static final double kMaxSpeedMetersPerSecond = 6;
@@ -260,8 +260,8 @@ public final class Constants {
 	public static class OperatorConstants {
 		public static final int kDriverControllerPort = 0;
 
-		public static final double deadband = SwerveConstants.kMaxSpeedMetersPerSecond * 0.05;
-		public static final double rotationalDeadband = SwerveConstants.kMaxAngularSpeedMetersPerSecond * 0.05;
+		public static final double deadband = SwerveConstants.kMaxSpeedMetersPerSecond * 0.1;
+		public static final double rotationalDeadband = SwerveConstants.kMaxAngularSpeedMetersPerSecond * 0.1;
 	}
 
 	public static class BeltConstants {

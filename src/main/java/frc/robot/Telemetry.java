@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -29,7 +31,10 @@ public class Telemetry {
     public Telemetry() {
         MaxSpeed = Constants.SwerveConstants.kMaxSpeedMetersPerSecond;
         SignalLogger.start();
-        field = (Field2d) SmartDashboard.getData("Field");
+        field = new Field2d();
+        // Swerve.getInstance().addVisionMeasurement(LimelightHelpers.getBotPose2d("limelight"), Timer.getFPGATimestamp());
+        SmartDashboard.putData("Field (Telemetry.java)", field);
+        // field = (Field2d) SmartDashboard.getData("Field");
     }
 
     /* What to publish over networktables for telemetry */

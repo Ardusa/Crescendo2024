@@ -26,7 +26,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotInit() {
-		DataLogManager.start("WPILog", "", 1);
+		// DataLogManager.start("WPILog", "", 1);
 		SmartDashboard.putData("Field", mField);
 		new RobotContainer();
 		DriverStation.silenceJoystickConnectionWarning(true);
@@ -45,17 +45,20 @@ public class Robot extends TimedRobot {
 				.onCommandInterrupt((action) -> DataLogManager.log("Interrupting " + action.getName()));
 		CommandScheduler.getInstance()
 				.onCommandFinish((action) -> DataLogManager.log("Finished " + action.getName()));
+
+		LimelightHelpers.setPipelineIndex("limelight", 1);
 	}
 
 	@Override
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
 		if (Constants.UseLimelight) {
-			
+
 			var lastResult = LimelightHelpers.getLatestResults("limelight").targetingResults;
 			Pose2d llPose = lastResult.getBotPose2d_wpiBlue();
 
-			if (lastResult.valid) {
+			if (LimelightHelpers.getTid("limelight") != -1) {
+				System.out.println("Valid");
 				Swerve.getInstance().addVisionMeasurement(llPose, Timer.getFPGATimestamp());
 			}
 		}
@@ -75,7 +78,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
-		mAutonomousCommand = new pathPlannerCommand(mChooser.getSelected(), true);
+		mAutonomousCommand = new pathPlannerCommand(mChooser.getSelected());
 		// mAutonomousCommand = new
 		// pathPlannerChooser(mChooser.getSelected()).generateTrajectory();
 

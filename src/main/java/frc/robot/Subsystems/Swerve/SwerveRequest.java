@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.robot.Utils;
 
 /**
  * Container for all the Swerve Requests. Use this to find all applicable swerve
@@ -130,11 +131,11 @@ public interface SwerveRequest {
         /**
          * The allowable deadband of the request.
          */
-        public double Deadband = 0;
+        public double Deadband = 0.1;
         /**
          * The rotational deadband of the request.
          */
-        public double RotationalDeadband = 0;
+        public double RotationalDeadband = 0.05;
 
         /**
          * The type of control request to use for the drive motor.
@@ -154,6 +155,7 @@ public interface SwerveRequest {
             double toApplyX = VelocityX;
             double toApplyY = VelocityY;
             double toApplyOmega = RotationalRate;
+            // System.out.println(Math.sqrt(toApplyX * toApplyX + toApplyY * toApplyY));
             if (Math.sqrt(toApplyX * toApplyX + toApplyY * toApplyY) < Deadband) {
                 toApplyX = 0;
                 toApplyY = 0;
@@ -183,6 +185,7 @@ public interface SwerveRequest {
          * @return this request
          */
         public FieldCentric withVelocityX(double velocityX) {
+            // if (Utils.withinRange(velocityX, 0.))
             this.VelocityX = velocityX;
             return this;
         }
@@ -210,6 +213,15 @@ public interface SwerveRequest {
          */
         public FieldCentric withRotationalRate(double rotationalRate) {
             this.RotationalRate = rotationalRate;
+            return this;
+        }
+
+        public FieldCentric withSlowDown(boolean babyOnBoard, double slowDownRate) {
+            if (babyOnBoard) {
+                this.VelocityX *= slowDownRate;
+                this.VelocityY *= slowDownRate;
+                this.RotationalRate *= slowDownRate;
+            }
             return this;
         }
 

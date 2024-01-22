@@ -13,8 +13,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Commands.Shooter.Intake;
-import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.Swerve.SwerveRequest;
 
@@ -27,7 +25,7 @@ public class RobotContainer {
 
 	private final Swerve drivetrain = Swerve.getInstance();
 	// public final Arm arm = Arm.getInstance();
-	public final Shooter belt = Shooter.getInstance();
+	// public final Shooter belt = Shooter.getInstance();
 
 	private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -47,6 +45,7 @@ public class RobotContainer {
 						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 						.withRotationalRate(
 								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
+						.withSlowDown(xDrive.rightBumper().getAsBoolean(), 0.5)
 
 				// negative X (left)
 				).ignoringDisable(true));
@@ -58,46 +57,23 @@ public class RobotContainer {
 		// reset the field-centric heading on left bumper press
 		xDrive.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
-		if (Robot.isSimulation()) {
-			drivetrain.seedFieldRelative(new Pose2d(new Translation2d(),
-					Rotation2d.fromDegrees(90)));
-		}
+		// xDrive.x().whileTrue(new AprilTagCmd());
 
-		xDrive.pov(0).whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(0.5).withVelocityY(0)));
-		xDrive.pov(180).whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(-0.5).withVelocityY(0)));
 
-		// arm.setDefaultCommand(
-		// new FineAdjust(() -> manip.getLeftY())
-		// );
-
-		belt.setDefaultCommand(
-				new Intake(() -> xDrive.getLeftTriggerAxis(), () -> xDrive.getRightTriggerAxis()));
-
-		// xDrive.leftTrigger(0.1).whileTrue(new Intake(() ->
-		// -xDrive.getLeftTriggerAxis()));
-		// xDrive.rightTrigger(0.1).whileTrue(new Intake(() ->
-		// xDrive.getRightTriggerAxis()));
-
-		// xDrive.leftTrigger()
-
-		// manip.a().onTrue(new SetPoint(140).withTimeout(2));
-		// manip.b().onTrue(new SetPoint(10).withTimeout(2));
-		// manip.x().whileTrue(new Intake());
-		// manip.y().whileTrue(new Shoot());
 
 		/* Set Sim Binds */
-		drivetrain.setDefaultCommand(
-				drivetrain.applyRequest(() -> drive.withVelocityX(simController.getRawAxis(0))
-						.withVelocityY(simController.getRawAxis(1)).withRotationalRate(simController.getRawAxis(2))));
+		// drivetrain.setDefaultCommand(
+		// 		drivetrain.applyRequest(() -> drive.withVelocityX(simController.getRawAxis(0))
+		// 				.withVelocityY(simController.getRawAxis(1)).withRotationalRate(simController.getRawAxis(2))));
 
-		new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
-				drivetrain.applyRequest(() -> brake));
+		// new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
+		// 		drivetrain.applyRequest(() -> brake));
 
-		new Trigger(() -> simController.getRawButtonPressed(2)).onTrue(
-				new InstantCommand(() -> drivetrain.seedFieldRelative()));
+		// new Trigger(() -> simController.getRawButtonPressed(2)).onTrue(
+		// 		new InstantCommand(() -> drivetrain.seedFieldRelative()));
 
-		new Trigger(() -> simController.getRawButtonPressed(3)).whileTrue(
-				drivetrain.applyRequest(() -> drive.withVelocityX(1).withVelocityY(1)));
+		// new Trigger(() -> simController.getRawButtonPressed(3)).whileTrue(
+		// 		drivetrain.applyRequest(() -> drive.withVelocityX(1).withVelocityY(1)));
 	}
 
 	public RobotContainer() {

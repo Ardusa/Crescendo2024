@@ -329,6 +329,9 @@ public class LimelightHelpers {
         public Pose2d getBotPose2d_wpiBlue() {
             return toPose2D(botpose_wpiblue);
         }
+        
+
+
 
         @JsonProperty("Retro")
         public LimelightTarget_Retro[] targets_Retro;
@@ -540,7 +543,7 @@ public class LimelightHelpers {
         return getLimelightNTDoubleArray(limelightName, "tc");
     }
 
-    public static double getFiducialID(String limelightName) {
+    public static double getTid(String limelightName) {
         return getLimelightNTDouble(limelightName, "tid");
     }
 

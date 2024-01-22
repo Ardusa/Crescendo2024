@@ -16,6 +16,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -148,6 +149,11 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
 
     public Pose2d getPose() {
         return getState().Pose;
+    }
+
+    public int getTID() {
+        return (int) NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0);
+
     }
 
     @Override
