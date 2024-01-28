@@ -38,7 +38,7 @@ public class RobotContainer {
 	private void configureBindings() {
 		drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
 				drivetrain.applyRequest(() -> drive
-						.withVelocityX(-xDrive.getLeftY() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+						.withVelocityX(xDrive.getLeftY() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 						.withRotationalRate(
 								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
@@ -60,13 +60,13 @@ public class RobotContainer {
 			drivetrain.setDefaultCommand(
 					drivetrain.applyRequest(() -> drive
 							.withVelocityX(
-									-simController.getRawAxis(1) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+									simController.getRawAxis(1) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 							.withVelocityY(
 									-simController.getRawAxis(0) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
-							.withRotationalRate(simController.getRawAxis(2)
+							.withRotationalRate(-simController.getRawAxis(2)
 									* Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond / 2)
-							.withSlowDown(simController.getRawButton(4), Constants.SwerveConstants.slowDownMultiplier))
-							.withName("xDrive"));
+							// .withSlowDown(simController.getRawButton(4), Constants.SwerveConstants.slowDownMultiplier))
+			).withName("xDrive"));
 
 			new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
 					drivetrain.applyRequest(() -> brake));

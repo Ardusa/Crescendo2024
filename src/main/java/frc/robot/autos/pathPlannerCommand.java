@@ -9,15 +9,17 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.Robot;
+import frc.robot.Commands.Swerve.Align;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class PathPlannerCommand extends SequentialCommandGroup {
     private Swerve swerve;
     private boolean nullAuto;
 
-    public PathPlannerCommand(String autoName) {
+    public PathPlannerCommand(String autoName, boolean shoot) {
         swerve = Swerve.getInstance();
         nullAuto = false;
         try {
@@ -29,7 +31,12 @@ public class PathPlannerCommand extends SequentialCommandGroup {
             System.out.println("Null auto");
         }
 
-        
+        this.addCommands(
+                new Align(() -> 0, () -> 0, Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+                        .until(() -> new WaitCommand(1).isFinished())
+                // Next it must shoot
+        );
+
         if (!nullAuto) {
             this.setName(autoName);
             this.addRequirements(swerve);

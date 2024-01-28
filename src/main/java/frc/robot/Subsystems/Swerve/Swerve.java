@@ -53,7 +53,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         configurePathPlanner();
-        if (Robot.isSimulation()) {
+        if (Utils.isSimulation()) {
             startSimThread();
         }
     }
@@ -61,7 +61,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     private Swerve(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
         configurePathPlanner();
-        if (Robot.isSimulation()) {
+        if (Utils.isSimulation()) {
             startSimThread();
         }
 

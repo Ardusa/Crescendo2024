@@ -158,6 +158,7 @@ public interface SwerveRequest {
                 this.VelocityX *= slowDownRate;
                 this.VelocityY *= slowDownRate;
                 this.RotationalRate *= slowDownRate;
+                System.out.println("Baby on board, slowing down!");
             }
             double toApplyX = VelocityX;
             double toApplyY = VelocityY;

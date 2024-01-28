@@ -91,13 +91,9 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
-		mAutonomousCommand = new PathPlannerCommand(mChooser.getSelected());
+		// mAutonomousCommand = new PathPlannerCommand(mChooser.getSelected());
 
-		if (mAutonomousCommand != null) {
-			mAutonomousCommand.schedule();
-		} else {
-			System.out.println("No Auto Loaded");
-		}
+		new PathPlannerCommand(mChooser.getSelected(), true).schedule();
 	}
 
 	@Override
@@ -106,14 +102,15 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousExit() {
-		PathPlannerCommand.unpublishTrajectory();
+		if (Robot.isReal())
+			PathPlannerCommand.unpublishTrajectory();
 	}
 
 	@Override
 	public void teleopInit() {
-		if (mAutonomousCommand != null) {
-			mAutonomousCommand.cancel();
-		}
+		// if (mAutonomousCommand != null) {
+		// 	mAutonomousCommand.cancel();
+		// }
 	}
 
 	@Override
