@@ -1,68 +1,50 @@
 package frc.robot.autos;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
-import frc.robot.Robot;
-import frc.robot.Commands.Swerve.Align;
+import frc.robot.Commands.Shooter.Intake;
+import frc.robot.Commands.Shooter.SetPoint;
+import frc.robot.Commands.Shooter.Shoot;
+import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
 
-public class PathPlannerCommand extends SequentialCommandGroup {
-    private Swerve swerve;
-    private boolean nullAuto;
+public class pathPlannerCommand extends SequentialCommandGroup {
+    private Swerve swerve = Swerve.getInstance();
+    private Shooter shooter = Shooter.getInstance();
 
-    public PathPlannerCommand(String autoName, boolean shoot) {
-        swerve = Swerve.getInstance();
-        nullAuto = false;
-        try {
-            swerve.seedFieldRelative(new Pose2d(PathPlannerAuto.getStaringPoseFromAutoFile(autoName).getTranslation(),
-                    Rotation2d.fromDegrees(0)));
-        } catch (Exception e) {
-            nullAuto = true;
-            this.setName("Null Auto");
-            System.out.println("Null auto");
-        }
+    public pathPlannerCommand(String autoName, boolean shootFirst) {
+        // Pose2d startingPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0)
+        //         .getPreviewStartingHolonomicPose();
+        // Swerve.getInstance().seedFieldRelative(startingPose, startingPose.getRotation().rotateBy(new Rotation2d(Math.PI)));
+        swerve.seedFieldRelative(PathPlannerAuto.getStaringPoseFromAutoFile(autoName));
 
-        this.addCommands(
-                new Align(() -> 0, () -> 0, Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
-                        .until(() -> new WaitCommand(1).isFinished())
-                // Next it must shoot
+        /* TODO: Add all named commands in pathplanner app */
+        NamedCommands.registerCommand("Shoot", new Shoot());
+        NamedCommands.registerCommand("Intake",
+                new SequentialCommandGroup(
+                        new SetPoint(Constants.ArmConstants.SetPoints.kIntakeAngle),
+                        new ParallelDeadlineGroup(new WaitCommand(1), new Intake()),
+                        new SetPoint(Constants.ArmConstants.SetPoints.kShootAngle)
+            )
         );
 
-        if (!nullAuto) {
-            this.setName(autoName);
-            this.addRequirements(swerve);
-            this.addCommands(
-                    AutoBuilder.buildAuto(autoName));
-        }
-    }
-
-    public static void publishTrajectory(String autoName) {
-        if (autoName.equals("null")) {
-            Robot.mField.getObject(Constants.AutoConstants.kFieldObjectName)
-                    .setPose(new Pose2d(-5, -5, Rotation2d.fromDegrees(0)));
-            return;
+        if (shootFirst) {
+            this.addCommands(new Shoot(), // Shoot
+            new SetPoint(Constants.ArmConstants.SetPoints.kIntakeAngle)); // Deploy intake for pickup
+        } else {
+            this.addCommands(new SetPoint(Constants.ArmConstants.SetPoints.kIntakeAngle)); // Deploy intake for pickup immediately
         }
 
-        List<Pose2d> poses = new ArrayList<>();
-        poses.clear();
+        this.setName(autoName);
+        this.addRequirements(swerve, shooter);
 
-        PathPlannerAuto.getPathGroupFromAutoFile(autoName).forEach(
-                (path) -> path.getAllPathPoints().forEach(
-                        (point) -> poses.add(new Pose2d(point.position, point.position.getAngle()))));
-
-        Swerve.getInstance().addFieldObj(poses);
-    }
-
-    public static void unpublishTrajectory() {
-        Swerve.getInstance().getField().close();
+        this.addCommands(
+                AutoBuilder.buildAuto(autoName).withName(autoName));
     }
 }

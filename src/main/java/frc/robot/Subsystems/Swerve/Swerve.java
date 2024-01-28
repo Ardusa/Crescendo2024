@@ -19,10 +19,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Constants.SwerveConstants;
 
 /**
@@ -65,7 +65,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
             startSimThread();
         }
 
-        mField = Robot.mField;
+        mField = (Field2d) SmartDashboard.getData("Field");
     }
 
     private void configurePathPlanner() {
@@ -89,7 +89,7 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
-        return run(() -> this.setControl(requestSupplier.get()));
+        return run(() -> this.setControl(requestSupplier.get())).withName("xDrive");
     }
 
     public Command getAutoPath(String pathName) {
@@ -125,6 +125,16 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
                 poses.add(state.getTargetHolonomicPose());
             i.incrementAndGet();
         });
+        // poses.add(trajectory.getInitialTargetHolonomicPose());
+        // for (int i = 0; i < trajectory.getStates().size(); i++) {
+        // if (i % 10 == 0 && !(trajectory.getState(i).equals(trajectory.getState(i -
+        // 1)))) {
+        // poses.add(trajectory.getState(i).getTargetHolonomicPose());
+        // }
+        // }
+        // for (State state : trajectory.getStates()) {
+        // poses.add(state.poseMeters);
+        // }
         mField.getObject(Constants.AutoConstants.kFieldObjectName).setPoses(poses);
     }
 
@@ -139,4 +149,46 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public Pose2d getPose() {
         return getState().Pose;
     }
+
+    @Override
+    public void periodic() {
+        try {
+            SmartDashboard.putString("Swerve/Default Command", this.getDefaultCommand().getName());
+        } catch (NullPointerException e) {
+            SmartDashboard.putString("Swerve/Default Command", "empty");
+        }
+        try {
+            SmartDashboard.putString("Swerve/Current Command", this.getCurrentCommand().getName());
+        } catch (NullPointerException e) {
+            SmartDashboard.putString("Current Command", "empty");
+        }
+
+        SmartDashboard.putNumberArray("Swerve/Pose", new double[] {
+                getPose().getX(),
+                getPose().getY(),
+                getPose().getRotation().getDegrees()
+        });
+
+        // SmartDashboard.putString("Current Command",
+        // this.getCurrentCommand().toString() != null ?
+        // this.getCurrentCommand().toString() : "empty");
+    }
+
+    // @Override
+    // public void initSendable(SendableBuilder builder) {
+    // builder.setSmartDashboardType("Subsystem");
+
+    // builder.addBooleanProperty(".hasDefault", () -> getDefaultCommand() != null,
+    // null);
+    // builder.addStringProperty(
+    // ".default",
+    // () -> getDefaultCommand() != null ? getDefaultCommand().getName() : "none",
+    // null);
+    // builder.addBooleanProperty(".hasCommand", () -> getCurrentCommand() != null,
+    // null);
+    // builder.addStringProperty(
+    // ".command",
+    // () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "none",
+    // null);
+    // }
 }
