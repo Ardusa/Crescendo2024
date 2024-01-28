@@ -167,7 +167,7 @@ public class SwerveDrivetrain {
             m_running = false;
             try {
                 m_thread.join(millis);
-            } catch (final InterruptedException ex) {
+            } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
             }
         }
@@ -314,6 +314,7 @@ public class SwerveDrivetrain {
             SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency,
             SwerveModuleConstants... modules) {
         IsOnCANFD = checkIsOnCanFD(driveTrainConstants.CANbusName);
+        System.out.println(IsOnCANFD);
 
         if (OdometryUpdateFrequency == 0) {
             UpdateFrequency = IsOnCANFD ? 250 : 100;
