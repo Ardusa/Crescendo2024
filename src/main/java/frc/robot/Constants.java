@@ -21,15 +21,17 @@ public final class Constants {
 	public static final double kRange = 20;
 
 	public static final boolean UseLimelight = true;
+	public static final String logDirectory = "";
 
 	public class SwerveConstants {
+		public static final double slowDownMultiplier = 0.5;
 		public static final double kMaxSpeedMetersPerSecond = 6;
 		public static final double kMaxAngularSpeedMetersPerSecond = 5 * Math.PI;
 
 		// The steer motor uses any SwerveModule.SteerRequestType control request with
 		// the output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
 		private static final Slot0Configs steerGains = new Slot0Configs()
-				.withKP(100).withKI(0).withKD(0.2)
+				.withKP(100).withKI(0).withKD(0.2)	// Changed 0.2 -> 0.25
 				.withKS(0).withKV(1.5).withKA(0);
 		// When using closed-loop control, the drive motor uses the control
 		// output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -39,10 +41,12 @@ public final class Constants {
 
 		// The closed-loop output type to use for the steer motors
 		// This affects the PID/FF gains for the steer motors
-		private static final ClosedLoopOutputType steerClosedLoopOutput = ClosedLoopOutputType.Voltage;
+		// private static final ClosedLoopOutputType steerClosedLoopOutput = ClosedLoopOutputType.Voltage;
+		private static final ClosedLoopOutputType steerClosedLoopOutput = ClosedLoopOutputType.TorqueCurrentFOC;
 		// The closed-loop output type to use for the drive motors;
 		// This affects the PID/FF gains for the drive motors
-		private static final ClosedLoopOutputType driveClosedLoopOutput = ClosedLoopOutputType.Voltage;
+		// private static final ClosedLoopOutputType driveClosedLoopOutput = ClosedLoopOutputType.Voltage;
+		private static final ClosedLoopOutputType driveClosedLoopOutput = ClosedLoopOutputType.TorqueCurrentFOC;
 
 		// The stator current at which the wheels start to slip;
 		private static final double kSlipCurrentA = 300.0;
@@ -84,7 +88,7 @@ public final class Constants {
 				.withDriveInertia(kDriveInertia)
 				.withSteerFrictionVoltage(kSteerFrictionVoltage)
 				.withDriveFrictionVoltage(kDriveFrictionVoltage)
-				.withFeedbackSource(SteerFeedbackType.FusedCANcoder)
+				.withFeedbackSource(SteerFeedbackType.SyncCANcoder)
 				.withCouplingGearRatio(kCoupleRatio)
 				.withSteerMotorInverted(kSteerMotorReversed);
 
@@ -143,7 +147,6 @@ public final class Constants {
 				kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset,
 				Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches),
 				kInvertLeftSide);
-
 		public static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
 				kFrontRightSteerMotorId, kFrontRightDriveMotorId, kFrontRightEncoderId,
 				kFrontRightEncoderOffset, Units.inchesToMeters(kFrontRightXPosInches),

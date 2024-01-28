@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 
+import org.ejml.simple.UnsupportedOperation;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +29,9 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class LimelightHelpers {
+    private LimelightHelpers() {
+        throw new UnsupportedOperation("This is a utility class! Access un-statically!");
+    }
 
     public static class LimelightTarget_Retro {
 
@@ -758,26 +763,29 @@ public class LimelightHelpers {
      * Parses Limelight's JSON results dump into a LimelightResults Object
      */
     public static LimelightResults getLatestResults(String limelightName) {
+        if (Robot.isReal()) {
+            long start = System.nanoTime();
+            LimelightHelpers.LimelightResults results = new LimelightHelpers.LimelightResults();
+            if (mapper == null) {
+                mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            }
 
-        long start = System.nanoTime();
-        LimelightHelpers.LimelightResults results = new LimelightHelpers.LimelightResults();
-        if (mapper == null) {
-            mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            try {
+                results = mapper.readValue(getJSONDump(limelightName), LimelightResults.class);
+            } catch (JsonProcessingException e) {
+                System.err.println("lljson error: " + e.getMessage());
+            }
+
+            long end = System.nanoTime();
+            double millis = (end - start) * .000001;
+            results.targetingResults.latency_jsonParse = millis;
+            if (profileJSON) {
+                System.out.printf("lljson: %.2f\r\n", millis);
+            }
+
+            return results;
+        } else {
+            return new LimelightHelpers.LimelightResults();
         }
-
-        try {
-            results = mapper.readValue(getJSONDump(limelightName), LimelightResults.class);
-        } catch (JsonProcessingException e) {
-            System.err.println("lljson error: " + e.getMessage());
-        }
-
-        long end = System.nanoTime();
-        double millis = (end - start) * .000001;
-        results.targetingResults.latency_jsonParse = millis;
-        if (profileJSON) {
-            System.out.printf("lljson: %.2f\r\n", millis);
-        }
-
-        return results;
     }
 }

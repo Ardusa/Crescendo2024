@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -32,6 +33,7 @@ public class RobotContainer {
 	private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
 	private final Telemetry logger;
+	public Field2d field;
 
 	private void configureBindings() {
 		drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -40,7 +42,7 @@ public class RobotContainer {
 						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 						.withRotationalRate(
 								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
-						.withSlowDown(xDrive.rightBumper().getAsBoolean(), 0.5)
+						.withSlowDown(xDrive.rightBumper().getAsBoolean(), Constants.SwerveConstants.slowDownMultiplier)
 
 				// negative X (left)
 				).ignoringDisable(true));
@@ -56,9 +58,15 @@ public class RobotContainer {
 		/* Set Sim Binds */
 		if (Robot.isSimulation()) {
 			drivetrain.setDefaultCommand(
-					drivetrain.applyRequest(() -> drive.withVelocityX(simController.getRawAxis(0))
-							.withVelocityY(simController.getRawAxis(1))
-							.withRotationalRate(simController.getRawAxis(2))));
+					drivetrain.applyRequest(() -> drive
+							.withVelocityX(
+									-simController.getRawAxis(1) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+							.withVelocityY(
+									-simController.getRawAxis(0) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+							.withRotationalRate(simController.getRawAxis(2)
+									* Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond / 2)
+							.withSlowDown(simController.getRawButton(4), Constants.SwerveConstants.slowDownMultiplier))
+							.withName("xDrive"));
 
 			new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
 					drivetrain.applyRequest(() -> brake));
@@ -67,12 +75,13 @@ public class RobotContainer {
 					new InstantCommand(() -> drivetrain.seedFieldRelative()));
 
 			new Trigger(() -> simController.getRawButtonPressed(3)).whileTrue(
-					drivetrain.applyRequest(() -> drive.withVelocityX(1).withVelocityY(1)));
+					drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(0)));
 		}
 	}
 
 	public RobotContainer() {
 		logger = new Telemetry();
+		field = Robot.mField;
 		drivetrain.registerTelemetry((telemetry) -> logger.telemeterize(telemetry));
 		configureBindings();
 	}

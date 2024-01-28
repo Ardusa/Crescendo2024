@@ -20,7 +20,7 @@ import frc.robot.Subsystems.Swerve.SwerveDrivetrain.SwerveDriveState;
 public class Telemetry {
     private final double MaxSpeed;
 
-    public Field2d field;
+    private Field2d field;
     /**
      * Construct a telemetry object, with the specified max speed of the robot
      * 
@@ -29,10 +29,7 @@ public class Telemetry {
     public Telemetry() {
         MaxSpeed = Constants.SwerveConstants.kMaxSpeedMetersPerSecond;
         SignalLogger.start();
-        field = new Field2d();
-        // Swerve.getInstance().addVisionMeasurement(LimelightHelpers.getBotPose2d("limelight"), Timer.getFPGATimestamp());
-        SmartDashboard.putData("Field (Telemetry.java)", field);
-        // field = (Field2d) SmartDashboard.getData("Field");
+        field = Robot.mField;
     }
 
     /* What to publish over networktables for telemetry */
@@ -98,15 +95,15 @@ public class Telemetry {
         lastTime = currentTime;
         Translation2d distanceDiff = pose.minus(m_lastPose).getTranslation();
         m_lastPose = pose;
-        
+
         Translation2d velocities = distanceDiff.div(diffTime);
         speed.set(velocities.getNorm());
         velocityX.set(velocities.getX());
         velocityY.set(velocities.getY());
         odomFreq.set(1.0 / state.OdometryPeriod);
-        
+
         Swerve.getInstance().getField().setRobotPose(pose);
-        
+
         /* Telemeterize the module's states */
         for (int i = 0; i < 4; ++i) {
             m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);
@@ -116,7 +113,8 @@ public class Telemetry {
             SmartDashboard.putData("Module " + i, m_moduleMechanisms[i]);
         }
 
-        SignalLogger.writeDoubleArray("odometry", new double[] {pose.getX(), pose.getY(), pose.getRotation().getDegrees()});
+        SignalLogger.writeDoubleArray("odometry",
+                new double[] { pose.getX(), pose.getY(), pose.getRotation().getDegrees() });
         SignalLogger.writeDouble("odom period", state.OdometryPeriod, "seconds");
     }
 }
