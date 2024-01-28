@@ -14,14 +14,11 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.autos.PathPlannerCommand;
 
-public class Robot extends TimedRobot {
-	private Command mAutonomousCommand;
-	public SendableChooser<String> mChooser = new SendableChooser<>();
+public class Robot extends TimedRobot {	public SendableChooser<String> mChooser = new SendableChooser<>();
 	public static Field2d mField;
 
 	public static boolean atComp = true;
@@ -91,8 +88,6 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
-		// mAutonomousCommand = new PathPlannerCommand(mChooser.getSelected());
-
 		new PathPlannerCommand(mChooser.getSelected(), true).schedule();
 	}
 
@@ -108,9 +103,6 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopInit() {
-		// if (mAutonomousCommand != null) {
-		// 	mAutonomousCommand.cancel();
-		// }
 	}
 
 	@Override
