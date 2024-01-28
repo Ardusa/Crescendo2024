@@ -12,7 +12,6 @@
       "/Pose": "Field2d",
       "/SmartDashboard/Auton Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/Field (Telemetry.java)": "Field2d",
       "/SmartDashboard/Mechanism": "Mechanism2d",
       "/SmartDashboard/Module 0": "Mechanism2d",
       "/SmartDashboard/Module 1": "Mechanism2d",
@@ -27,15 +26,11 @@
         }
       },
       "/SmartDashboard/Field": {
-        "Robot": {
-          "length": 0.7200000286102295,
-          "width": 0.7200000286102295
-        },
-        "height": 8.013679504394531,
-        "path": {
-          "style": "Line"
-        },
-        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Module 0": {
         "window": {
           "visible": true
         }
@@ -51,9 +46,6 @@
     },
     "transitory": {
       "Drive": {
-        "open": true
-      },
-      "PathPlanner": {
         "open": true
       },
       "SmartDashboard": {

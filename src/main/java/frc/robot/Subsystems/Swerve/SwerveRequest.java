@@ -130,14 +130,11 @@ public interface SwerveRequest {
         /**
          * The allowable deadband of the request.
          */
-        public double Deadband = 0.1;
+        public double Deadband = 0;
         /**
          * The rotational deadband of the request.
          */
-        public double RotationalDeadband = 0.05;
-
-        public boolean babyOnBoard = false;
-        public double slowDownRate = 0.5;
+        public double RotationalDeadband = 0;
 
         /**
          * The type of control request to use for the drive motor.
@@ -154,12 +151,6 @@ public interface SwerveRequest {
         protected SwerveModuleState[] m_lastAppliedState = null;
 
         public StatusCode apply(SwerveControlRequestParameters parameters, SwerveModule... modulesToApply) {
-            if (babyOnBoard) {
-                this.VelocityX *= slowDownRate;
-                this.VelocityY *= slowDownRate;
-                this.RotationalRate *= slowDownRate;
-                System.out.println("Baby on board, slowing down!");
-            }
             double toApplyX = VelocityX;
             double toApplyY = VelocityY;
             double toApplyOmega = RotationalRate;
@@ -219,12 +210,6 @@ public interface SwerveRequest {
          */
         public FieldCentric withRotationalRate(double rotationalRate) {
             this.RotationalRate = rotationalRate;
-            return this;
-        }
-
-        public FieldCentric withSlowDown(boolean babyOnBoard, double slowDownRate) {
-            this.babyOnBoard = babyOnBoard;
-            this.slowDownRate = slowDownRate;
             return this;
         }
 

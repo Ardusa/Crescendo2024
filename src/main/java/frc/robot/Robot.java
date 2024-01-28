@@ -17,33 +17,24 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Subsystems.Swerve.Swerve;
-import frc.robot.autos.PathPlannerCommand;
+import frc.robot.autos.pathPlannerCommand;
 
 public class Robot extends TimedRobot {
 	private Command mAutonomousCommand;
-	public SendableChooser<String> mChooser = new SendableChooser<>();
-	public static Field2d mField;
-
-	public static boolean atComp = true;
+	private SendableChooser<String> mChooser = new SendableChooser<>();
+	public static Field2d mField = new Field2d();
 
 	@Override
 	public void robotInit() {
-		if (!DriverStation.isFMSAttached()) {
-			atComp = true;
-			DataLogManager.start(Constants.logDirectory);
-		}
-
-		DriverStation.silenceJoystickConnectionWarning(true);
-		mField = new Field2d();
+		DataLogManager.start("WPILog", "", 1);
 		SmartDashboard.putData("Field", mField);
 		new RobotContainer();
-
-		// if (isSimulation()) {
-		// DataLogManager.start("WPILog", "", 1);
-		// }
+		DriverStation.silenceJoystickConnectionWarning(true);
 
 		mChooser.setDefaultOption("Do Nothing", "null");
-		AutoBuilder.getAllAutoNames().forEach((name) -> mChooser.addOption(name, name));
+		AutoBuilder.getAllAutoNames().forEach((name) -> {
+			mChooser.addOption(name, name);
+		});
 		SmartDashboard.putData("Auton Chooser", mChooser);
 
 		Swerve.getInstance().getDaqThread().setThreadPriority(99);
@@ -54,27 +45,20 @@ public class Robot extends TimedRobot {
 				.onCommandInterrupt((action) -> DataLogManager.log("Interrupting " + action.getName()));
 		CommandScheduler.getInstance()
 				.onCommandFinish((action) -> DataLogManager.log("Finished " + action.getName()));
-
-		LimelightHelpers.setPipelineIndex("limelight", 1);
 	}
 
 	@Override
 	public void robotPeriodic() {
-		if (atComp) {
-			DataLogManager.start(Constants.logDirectory);
-		}
-
 		CommandScheduler.getInstance().run();
-		if (Constants.UseLimelight && Robot.isReal()) {
-
+		if (Constants.UseLimelight) {
+			
 			var lastResult = LimelightHelpers.getLatestResults("limelight").targetingResults;
 			Pose2d llPose = lastResult.getBotPose2d_wpiBlue();
 
-			if (LimelightHelpers.getTid("limelight") != -1) {
+			if (lastResult.valid) {
 				Swerve.getInstance().addVisionMeasurement(llPose, Timer.getFPGATimestamp());
 			}
 		}
-		PathPlannerCommand.publishTrajectory(mChooser.getSelected());
 	}
 
 	@Override
@@ -91,9 +75,13 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousInit() {
-		// mAutonomousCommand = new PathPlannerCommand(mChooser.getSelected());
+		mAutonomousCommand = new pathPlannerCommand(mChooser.getSelected(), true);
+		// mAutonomousCommand = new
+		// pathPlannerChooser(mChooser.getSelected()).generateTrajectory();
 
-		new PathPlannerCommand(mChooser.getSelected(), true).schedule();
+		if (mAutonomousCommand != null) {
+			mAutonomousCommand.schedule();
+		}
 	}
 
 	@Override
@@ -102,15 +90,13 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousExit() {
-		if (Robot.isReal())
-			PathPlannerCommand.unpublishTrajectory();
 	}
 
 	@Override
 	public void teleopInit() {
-		// if (mAutonomousCommand != null) {
-		// 	mAutonomousCommand.cancel();
-		// }
+		if (mAutonomousCommand != null) {
+			mAutonomousCommand.cancel();
+		}
 	}
 
 	@Override
