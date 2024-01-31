@@ -1,50 +1,91 @@
 package frc.robot.autos;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.robot.Constants;
-import frc.robot.Commands.Shooter.Intake;
-import frc.robot.Commands.Shooter.SetPoint;
+import frc.robot.Robot;
 import frc.robot.Commands.Shooter.Shoot;
-import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
 
-public class pathPlannerCommand extends SequentialCommandGroup {
-    private Swerve swerve = Swerve.getInstance();
-    private Shooter shooter = Shooter.getInstance();
+public class PathPlannerCommand extends Command {
+    private Swerve swerve;
+    private Command auto;
 
-    public pathPlannerCommand(String autoName, boolean shootFirst) {
-        // Pose2d startingPose = PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0)
-        //         .getPreviewStartingHolonomicPose();
-        // Swerve.getInstance().seedFieldRelative(startingPose, startingPose.getRotation().rotateBy(new Rotation2d(Math.PI)));
-        swerve.seedFieldRelative(PathPlannerAuto.getStaringPoseFromAutoFile(autoName));
+    public PathPlannerCommand(String autoName, boolean shoot) {
+        NamedCommands.registerCommand("Shoot", new PrintCommand("Shoot Command, PathPlanner"));
+        NamedCommands.registerCommand("Intake", new PrintCommand("Intake Command, PathPlanner"));
 
-        /* TODO: Add all named commands in pathplanner app */
-        NamedCommands.registerCommand("Shoot", new Shoot());
-        NamedCommands.registerCommand("Intake",
-                new SequentialCommandGroup(
-                        new SetPoint(Constants.ArmConstants.SetPoints.kIntakeAngle),
-                        new ParallelDeadlineGroup(new WaitCommand(1), new Intake()),
-                        new SetPoint(Constants.ArmConstants.SetPoints.kShootAngle)
-            )
-        );
+        // if (Robot.isReal()) {
+        //     startingRotation = Rotation2d.fromDegrees(180);
+        // } else {
+        //     startingRotation = Rotation2d.fromDegrees(270);
+        // }
 
-        if (shootFirst) {
-            this.addCommands(new Shoot(), // Shoot
-            new SetPoint(Constants.ArmConstants.SetPoints.kIntakeAngle)); // Deploy intake for pickup
-        } else {
-            this.addCommands(new SetPoint(Constants.ArmConstants.SetPoints.kIntakeAngle)); // Deploy intake for pickup immediately
+        swerve = Swerve.getInstance();
+        try {
+            auto = AutoBuilder.buildAuto(autoName);
+        } catch (RuntimeException e) {
+            this.setName("Null Auto");
+            System.out.println("Null auto");
+            auto = new PrintCommand("Null Auto");
+        }
+            this.setName(autoName);
+            this.addRequirements(swerve);
+    }
+
+    @Override
+    public void initialize() {
+        new Shoot().schedule();
+        Pose2d startPose = new Pose2d(2, 4, Rotation2d.fromDegrees(157.5));
+        swerve.seedFieldRelative(startPose);
+        System.out.println("Starting Pose: " + startPose.toString());
+        auto.schedule();
+    }
+
+    @Override
+    public void execute() {
+    }
+    
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            auto.cancel();
+        }
+    }
+
+    @Override
+    public boolean isFinished() {
+        return auto.isFinished();
+    }
+
+    public static void publishTrajectory(String autoName) {
+        if (autoName.equals("null")) {
+            Robot.mField.getObject(Constants.AutoConstants.kFieldObjectName)
+                    .setPose(new Pose2d(-5, -5, Rotation2d.fromDegrees(0)));
+            return;
         }
 
-        this.setName(autoName);
-        this.addRequirements(swerve, shooter);
+        List<Pose2d> poses = new ArrayList<>();
+        poses.clear();
 
-        this.addCommands(
-                AutoBuilder.buildAuto(autoName).withName(autoName));
+        PathPlannerAuto.getPathGroupFromAutoFile(autoName).forEach(
+                (path) -> path.getAllPathPoints().forEach(
+                        (point) -> poses.add(new Pose2d(point.position, point.position.getAngle()))));
+
+        Swerve.getInstance().addFieldObj(poses);
+    }
+
+    public static void unpublishTrajectory() {
+        Swerve.getInstance().getField().getObject(Constants.AutoConstants.kFieldObjectName)
+                .setPose(new Pose2d(-5, -5, Rotation2d.fromDegrees(0)));
     }
 }

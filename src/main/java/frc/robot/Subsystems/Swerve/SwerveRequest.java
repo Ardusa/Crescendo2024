@@ -41,7 +41,8 @@ public interface SwerveRequest {
      * Applies this swerve request to the given modules.
      * This is typically called by the SwerveDrivetrain.
      *
-     * @param parameters Parameters the control request needs to calculate the module state
+     * @param parameters     Parameters the control request needs to calculate the
+     *                       module state
      * @param modulesToApply Modules to which the control request is applied
      * @return Status code of sending the request
      */
@@ -76,17 +77,20 @@ public interface SwerveRequest {
         /**
          * Sets the type of control request to use for the drive motor.
          *
-         * @param driveRequestType The type of control request to use for the drive motor
+         * @param driveRequestType The type of control request to use for the drive
+         *                         motor
          * @return this request
          */
         public SwerveDriveBrake withDriveRequestType(SwerveModule.DriveRequestType driveRequestType) {
             this.DriveRequestType = driveRequestType;
             return this;
         }
+
         /**
          * Sets the type of control request to use for the steer motor.
          *
-         * @param steerRequestType The type of control request to use for the steer motor
+         * @param steerRequestType The type of control request to use for the steer
+         *                         motor
          * @return this request
          */
         public SwerveDriveBrake withSteerRequestType(SwerveModule.SteerRequestType steerRequestType) {
@@ -130,11 +134,14 @@ public interface SwerveRequest {
         /**
          * The allowable deadband of the request.
          */
-        public double Deadband = 0;
+        public double Deadband = 0.1;
         /**
          * The rotational deadband of the request.
          */
-        public double RotationalDeadband = 0;
+        public double RotationalDeadband = 0.05;
+
+        public boolean babyOnBoard = false;
+        public double slowDownRate = 0.5;
 
         /**
          * The type of control request to use for the drive motor.
@@ -151,6 +158,11 @@ public interface SwerveRequest {
         protected SwerveModuleState[] m_lastAppliedState = null;
 
         public StatusCode apply(SwerveControlRequestParameters parameters, SwerveModule... modulesToApply) {
+            if (babyOnBoard) {
+                this.VelocityX *= slowDownRate;
+                this.VelocityY *= slowDownRate;
+                this.RotationalRate *= slowDownRate;
+            }
             double toApplyX = VelocityX;
             double toApplyY = VelocityY;
             double toApplyOmega = RotationalRate;
@@ -162,8 +174,9 @@ public interface SwerveRequest {
                 toApplyOmega = 0;
             }
 
-            ChassisSpeeds speeds = ChassisSpeeds.discretize(ChassisSpeeds.fromFieldRelativeSpeeds(toApplyX, toApplyY, toApplyOmega,
-                        parameters.currentPose.getRotation()), parameters.updatePeriod);
+            ChassisSpeeds speeds = ChassisSpeeds
+                    .discretize(ChassisSpeeds.fromFieldRelativeSpeeds(toApplyX, toApplyY, toApplyOmega,
+                            parameters.currentPose.getRotation()), parameters.updatePeriod);
 
             var states = parameters.kinematics.toSwerveModuleStates(speeds, new Translation2d());
 
@@ -213,6 +226,17 @@ public interface SwerveRequest {
             return this;
         }
 
+        public FieldCentric withSlowDown(boolean babyOnBoard, double slowDownRate) {
+            this.babyOnBoard = babyOnBoard;
+            if (slowDownRate == 0) {
+                slowDownRate = 0.5;
+            } else {
+                this.slowDownRate = slowDownRate;
+            }
+
+            return this;
+        }
+
         /**
          * Sets the allowable deadband of the request.
          *
@@ -223,6 +247,7 @@ public interface SwerveRequest {
             this.Deadband = deadband;
             return this;
         }
+
         /**
          * Sets the rotational deadband of the request.
          *
@@ -237,17 +262,20 @@ public interface SwerveRequest {
         /**
          * Sets the type of control request to use for the drive motor.
          *
-         * @param driveRequestType The type of control request to use for the drive motor
+         * @param driveRequestType The type of control request to use for the drive
+         *                         motor
          * @return this request
          */
         public FieldCentric withDriveRequestType(SwerveModule.DriveRequestType driveRequestType) {
             this.DriveRequestType = driveRequestType;
             return this;
         }
+
         /**
          * Sets the type of control request to use for the steer motor.
          *
-         * @param steerRequestType The type of control request to use for the steer motor
+         * @param steerRequestType The type of control request to use for the steer
+         *                         motor
          * @return this request
          */
         public FieldCentric withSteerRequestType(SwerveModule.SteerRequestType steerRequestType) {
@@ -339,8 +367,9 @@ public interface SwerveRequest {
                 toApplyOmega = 0;
             }
 
-            ChassisSpeeds speeds = ChassisSpeeds.discretize(ChassisSpeeds.fromFieldRelativeSpeeds(toApplyX, toApplyY, toApplyOmega,
-                    parameters.currentPose.getRotation()), parameters.updatePeriod);
+            ChassisSpeeds speeds = ChassisSpeeds
+                    .discretize(ChassisSpeeds.fromFieldRelativeSpeeds(toApplyX, toApplyY, toApplyOmega,
+                            parameters.currentPose.getRotation()), parameters.updatePeriod);
 
             var states = parameters.kinematics.toSwerveModuleStates(speeds, new Translation2d());
 
@@ -401,6 +430,7 @@ public interface SwerveRequest {
             this.Deadband = deadband;
             return this;
         }
+
         /**
          * Sets the rotational deadband of the request.
          *
@@ -415,17 +445,20 @@ public interface SwerveRequest {
         /**
          * Sets the type of control request to use for the drive motor.
          *
-         * @param driveRequestType The type of control request to use for the drive motor
+         * @param driveRequestType The type of control request to use for the drive
+         *                         motor
          * @return this request
          */
         public FieldCentricFacingAngle withDriveRequestType(SwerveModule.DriveRequestType driveRequestType) {
             this.DriveRequestType = driveRequestType;
             return this;
         }
+
         /**
          * Sets the type of control request to use for the steer motor.
          *
-         * @param steerRequestType The type of control request to use for the steer motor
+         * @param steerRequestType The type of control request to use for the steer
+         *                         motor
          * @return this request
          */
         public FieldCentricFacingAngle withSteerRequestType(SwerveModule.SteerRequestType steerRequestType) {
@@ -488,17 +521,20 @@ public interface SwerveRequest {
         /**
          * Sets the type of control request to use for the drive motor.
          *
-         * @param driveRequestType The type of control request to use for the drive motor
+         * @param driveRequestType The type of control request to use for the drive
+         *                         motor
          * @return this request
          */
         public PointWheelsAt withDriveRequestType(SwerveModule.DriveRequestType driveRequestType) {
             this.DriveRequestType = driveRequestType;
             return this;
         }
+
         /**
          * Sets the type of control request to use for the steer motor.
          *
-         * @param steerRequestType The type of control request to use for the steer motor
+         * @param steerRequestType The type of control request to use for the steer
+         *                         motor
          * @return this request
          */
         public PointWheelsAt withSteerRequestType(SwerveModule.SteerRequestType steerRequestType) {
@@ -629,6 +665,7 @@ public interface SwerveRequest {
             this.Deadband = deadband;
             return this;
         }
+
         /**
          * Sets the rotational deadband of the request.
          *
@@ -643,17 +680,20 @@ public interface SwerveRequest {
         /**
          * Sets the type of control request to use for the drive motor.
          *
-         * @param driveRequestType The type of control request to use for the drive motor
+         * @param driveRequestType The type of control request to use for the drive
+         *                         motor
          * @return this request
          */
         public RobotCentric withDriveRequestType(SwerveModule.DriveRequestType driveRequestType) {
             this.DriveRequestType = driveRequestType;
             return this;
         }
+
         /**
          * Sets the type of control request to use for the steer motor.
          *
-         * @param steerRequestType The type of control request to use for the steer motor
+         * @param steerRequestType The type of control request to use for the steer
+         *                         motor
          * @return this request
          */
         public RobotCentric withSteerRequestType(SwerveModule.SteerRequestType steerRequestType) {
@@ -703,6 +743,7 @@ public interface SwerveRequest {
             this.Speeds = speeds;
             return this;
         }
+
         /**
          * Sets the center of rotation to rotate around.
          *
@@ -717,17 +758,20 @@ public interface SwerveRequest {
         /**
          * Sets the type of control request to use for the drive motor.
          *
-         * @param driveRequestType The type of control request to use for the drive motor
+         * @param driveRequestType The type of control request to use for the drive
+         *                         motor
          * @return this request
          */
         public ApplyChassisSpeeds withDriveRequestType(SwerveModule.DriveRequestType driveRequestType) {
             this.DriveRequestType = driveRequestType;
             return this;
         }
+
         /**
          * Sets the type of control request to use for the steer motor.
          *
-         * @param steerRequestType The type of control request to use for the steer motor
+         * @param steerRequestType The type of control request to use for the steer
+         *                         motor
          * @return this request
          */
         public ApplyChassisSpeeds withSteerRequestType(SwerveModule.SteerRequestType steerRequestType) {

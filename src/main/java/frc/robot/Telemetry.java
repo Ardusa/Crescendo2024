@@ -32,20 +32,15 @@ public class Telemetry {
         field = (Field2d) SmartDashboard.getData("Field");
     }
 
-    /* What to publish over networktables for telemetry */
-    private final NetworkTableInstance inst = NetworkTableInstance.getDefault();
-
-    /* Robot pose for field positioning */
-    // private final NetworkTable table = inst.getTable("Pose");
-    // private final DoubleArrayPublisher fieldPub = table.getDoubleArrayTopic("robotPose").publish();
-    // private final StringPublisher fieldTypePub = table.getStringTopic(".type").publish();
-
     /* Robot speeds for general checking */
-    private final NetworkTable driveStats = inst.getTable("Drive");
+    private final NetworkTable driveStats = NetworkTableInstance.getDefault().getTable("Drive");
     private final DoublePublisher velocityX = driveStats.getDoubleTopic("Velocity X").publish();
     private final DoublePublisher velocityY = driveStats.getDoubleTopic("Velocity Y").publish();
+    private final DoublePublisher velocityTheta = driveStats.getDoubleTopic("Velocity Theta").publish();
     private final DoublePublisher speed = driveStats.getDoubleTopic("Speed").publish();
     private final DoublePublisher odomFreq = driveStats.getDoubleTopic("Odometry Frequency").publish();
+
+    private final DoublePublisher poseRads = driveStats.getDoubleTopic("Pose in Radians").publish();
 
     /* Keep a reference of the last pose to calculate the speeds */
     private Pose2d m_lastPose = new Pose2d();
@@ -81,12 +76,9 @@ public class Telemetry {
     public void telemeterize(SwerveDriveState state) {
         /* Telemeterize the pose */
         Pose2d pose = state.Pose;
-        // fieldTypePub.set("Field2d");
-        // fieldPub.set(new double[] {
-        //     pose.getX(),
-        //     pose.getY(),
-        //     pose.getRotation().getDegrees()
-        // });
+        poseRads.set(state.Pose.getRotation().getRadians());
+
+        // Pose2d pose = new Pose2d(state.Pose.getTranslation(), Rotation2d.fromDegrees(state.Pose.getRotation().getDegrees()));
         field.setRobotPose(pose);
 
         /* Telemeterize the robot's general speeds */
@@ -100,6 +92,7 @@ public class Telemetry {
         speed.set(velocities.getNorm());
         velocityX.set(velocities.getX());
         velocityY.set(velocities.getY());
+        velocityTheta.set(velocities.getAngle().getDegrees());
         odomFreq.set(1.0 / state.OdometryPeriod);
         
         Swerve.getInstance().getField().setRobotPose(pose);
