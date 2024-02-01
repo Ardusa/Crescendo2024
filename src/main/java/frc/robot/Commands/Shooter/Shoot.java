@@ -1,5 +1,7 @@
 package frc.robot.Commands.Shooter;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Shooter.Shooter;
@@ -7,8 +9,16 @@ import frc.robot.Subsystems.Shooter.Shooter;
 public class Shoot extends Command {
     private final Shooter shooter = Shooter.getInstance();
     private double shootSpeed;
+    private DoubleSupplier input1, input2;
 
-    public Shoot() {
+    /**
+     * 
+     * @param input1 shooter
+     * @param input2 feeder
+     */
+    public Shoot(DoubleSupplier input1, DoubleSupplier input2) {
+        this.input1 = input1;
+        this.input2 = input2;
         this.setName("Shoot");
         this.addRequirements(shooter);
         shootSpeed = Constants.BeltConstants.kBeltSpeedSpeaker;
@@ -19,7 +29,7 @@ public class Shoot extends Command {
 
     @Override
     public void execute() {
-        shooter.shoot(01, 01);
+        shooter.shoot(input1.getAsDouble(), input2.getAsDouble());
     }
 
     @Override

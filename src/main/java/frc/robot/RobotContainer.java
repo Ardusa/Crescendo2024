@@ -41,7 +41,7 @@ public class RobotContainer {
 
 	private void configureBindings() {
 		Shooter.getInstance().setDefaultCommand(
-			new Shoot()
+			new Shoot(() -> 1, () -> 1)
 		);
 		
 		// xDrive.a().whileTrue(new Shoot());

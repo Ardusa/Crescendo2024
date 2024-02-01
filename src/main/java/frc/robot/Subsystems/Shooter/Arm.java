@@ -43,7 +43,7 @@
 
 //     private Arm() {
 //         armControl = new PositionDutyCycle(0).withEnableFOC(true).withFeedForward(Constants.ArmConstants.kFeedForward)
-//                 .withUpdateFreqHz(20).withVelocity(2);
+//                 .withUpdateFreqHz(20);
 
 //         armVelocityControl = new VelocityDutyCycle(0).withEnableFOC(true);
 //         armMotionControl = new MotionMagicDutyCycle(0);
@@ -72,19 +72,19 @@
 //                         .withReverseLimitAutosetPositionValue(Constants.ArmConstants.kArmMaxAngle));
 
 //         /* Robot is 30 inches front to back, bumper to bumper */
-//         double bumperToBumper = 15, tolerance = 10;
+//         // double bumperToBumper = 15, tolerance = 10;
 
-//         armRotation = 90;
-//         armMechanism = new Mechanism2d(2 * Units.inchesToMeters(bumperToBumper + tolerance), Units.feetToMeters(2.5),
-//                 new Color8Bit(Color.kOrange));
-//         elbowLigament = new MechanismLigament2d("Elbow", Units.inchesToMeters(bumperToBumper), armRotation, 18,
-//                 new Color8Bit(Color.kBlack));
-//         shoulderLigament = new MechanismLigament2d("Shoulder", Units.feetToMeters(0.35), -90, 18,
-//                 new Color8Bit(Color.kBlack));
-//         phantomLigament = new MechanismLigament2d("Phantom", Units.feetToMeters(2), 60, 9, new Color8Bit(Color.kGray));
-//         armMechanism.getRoot("Root", Units.inchesToMeters(bumperToBumper + tolerance), Units.feetToMeters(0.5))
-//                 .append(elbowLigament).append(shoulderLigament).append(phantomLigament);
-//         SmartDashboard.putData("Mechanism", armMechanism);
+//         // armRotation = 90;
+//         // armMechanism = new Mechanism2d(2 * Units.inchesToMeters(bumperToBumper + tolerance), Units.feetToMeters(2.5),
+//         //         new Color8Bit(Color.kOrange));
+//         // elbowLigament = new MechanismLigament2d("Elbow", Units.inchesToMeters(bumperToBumper), armRotation, 18,
+//         //         new Color8Bit(Color.kBlack));
+//         // shoulderLigament = new MechanismLigament2d("Shoulder", Units.feetToMeters(0.35), -90, 18,
+//         //         new Color8Bit(Color.kBlack));
+//         // phantomLigament = new MechanismLigament2d("Phantom", Units.feetToMeters(2), 60, 9, new Color8Bit(Color.kGray));
+//         // armMechanism.getRoot("Root", Units.inchesToMeters(bumperToBumper + tolerance), Units.feetToMeters(0.5))
+//         //         .append(elbowLigament).append(shoulderLigament).append(phantomLigament);
+//         // SmartDashboard.putData("Mechanism", armMechanism);
 //     }
 
 //     /**

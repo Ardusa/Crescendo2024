@@ -1,12 +1,9 @@
 package frc.robot.Subsystems.Shooter;
 
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Custom.LoggyThings.LoggyTalonFX;
 
 public class Shooter extends SubsystemBase {
@@ -40,21 +37,12 @@ public class Shooter extends SubsystemBase {
         feedMotor = new LoggyTalonFX(Constants.BeltConstants.feedMotor, false);
         feedMotor.setInverted(Constants.BeltConstants.feedIsInverted);
         
-        shootMotorRight.setNeutralMode(NeutralModeValue.Brake);
-        shootMotorLeft.setNeutralMode(NeutralModeValue.Brake);
-        feedMotor.setNeutralMode(NeutralModeValue.Brake);
+        shootMotorRight.setNeutralMode(NeutralModeValue.Coast);
+        shootMotorLeft.setNeutralMode(NeutralModeValue.Coast);
+        feedMotor.setNeutralMode(NeutralModeValue.Coast);
 
-        // shootMotorLeft.setControl(new Follower(shootMotorRight.getDeviceID(), false));
         holding = false;
     }
-
-    // public void shoot(double speed, double speed2) {
-    //     beltMotorRight.set(speed);
-    //     beltMotorLeft.set(speed2);
-    //     setHolding(false);
-    //     SmartDashboard.putNumber("Left Power", speed);
-    //     SmartDashboard.putNumber("Right Power", speed2);
-    // }
 
     public void shoot(double shooter, double feeder) {
         shootMotorRight.set(shooter);
