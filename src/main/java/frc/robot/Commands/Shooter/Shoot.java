@@ -19,7 +19,7 @@ public class Shoot extends Command {
 
     @Override
     public void execute() {
-        shooter.shoot(shootSpeed);
+        shooter.shoot(01, 01);
     }
 
     @Override

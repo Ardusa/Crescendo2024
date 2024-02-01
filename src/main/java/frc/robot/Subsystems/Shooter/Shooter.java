@@ -44,7 +44,7 @@ public class Shooter extends SubsystemBase {
         shootMotorLeft.setNeutralMode(NeutralModeValue.Brake);
         feedMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        shootMotorLeft.setControl(new Follower(shootMotorRight.getDeviceID(), false));
+        // shootMotorLeft.setControl(new Follower(shootMotorRight.getDeviceID(), false));
         holding = false;
     }
 
@@ -56,9 +56,10 @@ public class Shooter extends SubsystemBase {
     //     SmartDashboard.putNumber("Right Power", speed2);
     // }
 
-    public void shoot(double speed) {
-        shootMotorRight.set(speed);
-        feedMotor.set(speed);
+    public void shoot(double shooter, double feeder) {
+        shootMotorRight.set(shooter);
+        feedMotor.set(feeder);
+        shootMotorLeft.set(shooter);
     }
 
     public void stop() {
@@ -80,6 +81,7 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // System.out.println("Shooter alive");
         // if (Robot.isReal()) {
         //     SmartDashboard.putNumber("Velocity Left Belt", shootMotorRight.getVelocity().getValue());
         //     SmartDashboard.putNumber("Velocity Right Belt", shootMotorLeft.getVelocity().getValue());
