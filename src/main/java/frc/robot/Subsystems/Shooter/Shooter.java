@@ -11,7 +11,8 @@ import frc.robot.Custom.LoggyThings.LoggyTalonFX;
 
 public class Shooter extends SubsystemBase {
     private static Shooter mInstance;
-    private LoggyTalonFX beltMotorRight, beltMotorLeft, beltMotorCenter;
+    /** shootMotorRight is the master motor */
+    private LoggyTalonFX shootMotorRight, shootMotorLeft, feedMotor;
 
     public enum Target {
         kSpeaker,
@@ -30,15 +31,20 @@ public class Shooter extends SubsystemBase {
     }
 
     private Shooter() {
-        beltMotorRight = new LoggyTalonFX(Constants.BeltConstants.beltMotorRight, false);
-        beltMotorLeft = new LoggyTalonFX(Constants.BeltConstants.beltMotorLeft, false);
-        beltMotorCenter = new LoggyTalonFX(Constants.BeltConstants.beltMotorLeft, false);
+        shootMotorRight = new LoggyTalonFX(Constants.BeltConstants.shootMotorRight, false);
+        shootMotorRight.setInverted(Constants.BeltConstants.rightShootIsInverted);
 
-        beltMotorRight.setNeutralMode(NeutralModeValue.Brake);
-        beltMotorLeft.setNeutralMode(NeutralModeValue.Brake);
-        beltMotorCenter.setNeutralMode(NeutralModeValue.Brake);
+        shootMotorLeft = new LoggyTalonFX(Constants.BeltConstants.shootMotorLeft, false);
+        shootMotorLeft.setInverted(Constants.BeltConstants.leftShootIsInverted);
 
-        beltMotorLeft.setControl(new Follower(beltMotorRight.getDeviceID(), false));
+        feedMotor = new LoggyTalonFX(Constants.BeltConstants.feedMotor, false);
+        feedMotor.setInverted(Constants.BeltConstants.feedIsInverted);
+        
+        shootMotorRight.setNeutralMode(NeutralModeValue.Brake);
+        shootMotorLeft.setNeutralMode(NeutralModeValue.Brake);
+        feedMotor.setNeutralMode(NeutralModeValue.Brake);
+
+        shootMotorLeft.setControl(new Follower(shootMotorRight.getDeviceID(), false));
         holding = false;
     }
 
@@ -51,13 +57,13 @@ public class Shooter extends SubsystemBase {
     // }
 
     public void shoot(double speed) {
-        beltMotorRight.set(speed);
-        beltMotorCenter.set(speed);
+        shootMotorRight.set(speed);
+        feedMotor.set(speed);
     }
 
     public void stop() {
-        beltMotorRight.set(0);
-        beltMotorCenter.set(0);
+        shootMotorRight.set(0);
+        feedMotor.set(0);
     }
 
     public void setHolding(boolean holding) {
@@ -74,19 +80,9 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (Robot.isReal()) {
-            SmartDashboard.putNumber("Velocity Left Belt", beltMotorRight.getVelocity().getValue());
-            SmartDashboard.putNumber("Velocity Right Belt", beltMotorLeft.getVelocity().getValue());
-            SmartDashboard.putNumber("Spin Delta Belt",
-                    beltMotorLeft.getVelocity().getValue() - beltMotorRight.getVelocity().getValue());
-        }
-        
-        // if (getCurrentCommand() instanceof Intake) {
-        //     if (beltMotorLeft.get() * Constants.BeltConstants.kBeltIntakeVelocityMax > beltMotorLeft.getVelocity()
-        //             .getValue() + Constants.BeltConstants.beltBufferVelocity && Robot.isReal()) {
-        //         setHolding(true);
-        //         stop();
-        //     }
+        // if (Robot.isReal()) {
+        //     SmartDashboard.putNumber("Velocity Left Belt", shootMotorRight.getVelocity().getValue());
+        //     SmartDashboard.putNumber("Velocity Right Belt", shootMotorLeft.getVelocity().getValue());
         // }
     }
 }

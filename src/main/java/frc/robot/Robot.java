@@ -15,8 +15,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Commands.PathPlannerCommand;
 import frc.robot.Subsystems.Swerve.Swerve;
-import frc.robot.autos.PathPlannerCommand;
 
 public class Robot extends TimedRobot {
 	public SendableChooser<String> mChooser = new SendableChooser<>();
@@ -26,7 +26,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotInit() {
-		if (!DriverStation.isFMSAttached()) {
+		if (DriverStation.isFMSAttached()) {
 			atComp = true;
 			DataLogManager.start(Constants.logDirectory);
 		}
@@ -46,11 +46,12 @@ public class Robot extends TimedRobot {
 				.onCommandInitialize((action) -> DataLogManager.log("Intializing " + action.getName()));
 		CommandScheduler.getInstance()
 				.onCommandInterrupt((action) -> DataLogManager.log("Interrupting " + action.getName()));
-		CommandScheduler.getInstance()
-				.onCommandFinish((action) -> DataLogManager.log("Finished " + action.getName()));
+		CommandScheduler.getInstance().onCommandFinish((action) -> DataLogManager.log("Finished " + action.getName()));
 
 		LimelightHelpers.setPipelineIndex(Constants.Vision.llAprilTag, Constants.Vision.llAprilTagPipelineIndex);
 		LimelightHelpers.setPipelineIndex(Constants.Vision.llPython, Constants.Vision.llPythonPipelineIndex);
+
+
 	}
 
 	@Override
@@ -73,16 +74,13 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void disabledInit() {
-	}
+	public void disabledInit() {}
 
 	@Override
-	public void disabledPeriodic() {
-	}
+	public void disabledPeriodic() {}
 
 	@Override
-	public void disabledExit() {
-	}
+	public void disabledExit() {}
 
 	@Override
 	public void autonomousInit() {
@@ -90,8 +88,7 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void autonomousPeriodic() {
-	}
+	public void autonomousPeriodic() {}
 
 	@Override
 	public void autonomousExit() {
@@ -99,16 +96,13 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void teleopInit() {
-	}
+	public void teleopInit() {}
 
 	@Override
-	public void teleopPeriodic() {
-	}
+	public void teleopPeriodic() {}
 
 	@Override
-	public void teleopExit() {
-	}
+	public void teleopExit() {}
 
 	@Override
 	public void testInit() {
@@ -116,18 +110,14 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void testPeriodic() {
-	}
+	public void testPeriodic() {}
 
 	@Override
-	public void testExit() {
-	}
+	public void testExit() {}
 
 	@Override
-	public void simulationPeriodic() {
-	}
+	public void simulationPeriodic() {}
 
 	@Override
-	public void simulationInit() {
-	}
+	public void simulationInit() {}
 }

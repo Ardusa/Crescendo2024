@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Commands.Shooter.Shoot;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.Swerve.SwerveRequest;
 import frc.robot.Subsystems.Swerve.SwerveModule.DriveRequestType;
@@ -22,7 +23,7 @@ public class RobotContainer {
 	private final CommandXboxController xDrive = new CommandXboxController(0);
 	private final GenericHID simController = new GenericHID(3);
 
-	private final Swerve drivetrain = Swerve.getInstance();
+	// private final Swerve drivetrain = Swerve.getInstance();
 
 	private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -38,54 +39,58 @@ public class RobotContainer {
 	public Field2d field;
 
 	private void configureBindings() {
-		drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-				drivetrain.applyRequest(() -> drive
-						.withVelocityX(-xDrive.getLeftY() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
-						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
-						.withRotationalRate(
-								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
-						.withSlowDown(xDrive.rightBumper().getAsBoolean(), 0.5)
+		xDrive.a().whileTrue(new Shoot());
 
-				// negative X (left)
-				).ignoringDisable(true));
+		// drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+		// 		drivetrain.applyRequest(() -> drive
+		// 				.withVelocityX(-xDrive.getLeftY() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+		// 				.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+		// 				.withRotationalRate(
+		// 						-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
+		// 				.withSlowDown(xDrive.rightBumper().getAsBoolean(), 0.5)
 
-		xDrive.a().whileTrue(drivetrain.applyRequest(() -> brake));
-		xDrive.b().whileTrue(drivetrain
-				.applyRequest(() -> point.withModuleDirection(new Rotation2d(-xDrive.getLeftY(), -xDrive.getLeftX()))));
-		xDrive.x().whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(1)));
+		// 		// negative X (left)
+		// 		).ignoringDisable(true));
+
+
+
+		// xDrive.a().whileTrue(drivetrain.applyRequest(() -> brake));
+		// xDrive.b().whileTrue(drivetrain
+		// 		.applyRequest(() -> point.withModuleDirection(new Rotation2d(-xDrive.getLeftY(), -xDrive.getLeftX()))));
+		// xDrive.x().whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(1)));
 
 		// reset the field-centric heading on left bumper press
-		xDrive.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+		// xDrive.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
 		/* Set Sim Binds */
-		if (Robot.isSimulation()) {
-			drivetrain.setDefaultCommand(
-					drivetrain.applyRequest(() -> drive
-							.withVelocityX(
-									-simController.getRawAxis(1) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
-							.withVelocityY(
-									-simController.getRawAxis(0) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
-							.withRotationalRate(-simController.getRawAxis(3)
-									* Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond / 2)
-					.withSlowDown(simController.getRawButton(4),
-					Constants.SwerveConstants.slowDownMultiplier)
-					).withName("xDrive"));
+	// 	if (Robot.isSimulation()) {
+	// 		drivetrain.setDefaultCommand(
+	// 				drivetrain.applyRequest(() -> drive
+	// 						.withVelocityX(
+	// 								-simController.getRawAxis(1) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+	// 						.withVelocityY(
+	// 								-simController.getRawAxis(0) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
+	// 						.withRotationalRate(-simController.getRawAxis(3)
+	// 								* Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond / 2)
+	// 				.withSlowDown(simController.getRawButton(4),
+	// 				Constants.SwerveConstants.slowDownMultiplier)
+	// 				).withName("xDrive"));
 
-			new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
-					drivetrain.applyRequest(() -> brake));
+	// 		new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(
+	// 				drivetrain.applyRequest(() -> brake));
 
-			new Trigger(() -> simController.getRawButtonPressed(2)).onTrue(
-					new InstantCommand(() -> drivetrain.seedFieldRelative()));
+	// 		new Trigger(() -> simController.getRawButtonPressed(2)).onTrue(
+	// 				new InstantCommand(() -> drivetrain.seedFieldRelative()));
 
-			new Trigger(() -> simController.getRawButtonPressed(3)).whileTrue(
-					drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(0)));
-		}
+	// 		new Trigger(() -> simController.getRawButtonPressed(3)).whileTrue(
+	// 				drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(0)));
+	// 	}
 	}
 
 	public RobotContainer() {
 		logger = new Telemetry();
 		field = Robot.mField;
-		drivetrain.registerTelemetry((telemetry) -> logger.telemeterize(telemetry));
+		// drivetrain.registerTelemetry((telemetry) -> logger.telemeterize(telemetry));
 		configureBindings();
 	}
 
