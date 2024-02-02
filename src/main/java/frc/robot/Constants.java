@@ -27,14 +27,14 @@ public final class Constants {
 	public static final String logDirectory = "";
 
 	public class Vision {
-		public static final boolean UseLimelight = true;
+		public static final boolean UseLimelight = false;
 		public static final String llAprilTag = "limelight";
 		public static final int llAprilTagPipelineIndex = 0;
 
 		public static final String llPython = "limelight-python";
 		public static final int llPythonPipelineIndex = 0;
 	}
-
+	
 	public class SwerveConstants {
 		public static final double slowDownMultiplier = 0.5;
 		public static final double kMaxSpeedMetersPerSecond = 6;
@@ -43,8 +43,11 @@ public final class Constants {
 		/* TODO: redo for new swerve */
 		// The steer motor uses any SwerveModule.SteerRequestType control request with
 		// the output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
-		private static final Slot0Configs steerGains = new Slot0Configs().withKP(100).withKI(0).withKD(0.2).withKS(0)
-				.withKV(1.5).withKA(0);
+		private static final Slot0Configs steerGains = new Slot0Configs()
+				.withKP(100).withKI(0).withKD(0.2)
+				.withKS(0).withKV(1.5).withKA(0);
+
+		/* 0.32 is the approx underestimate */
 		// When using closed-loop control, the drive motor uses the control
 		// output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
 		private static final Slot0Configs driveGains = new Slot0Configs().withKP(3).withKI(0).withKD(0).withKS(0)
@@ -65,7 +68,7 @@ public final class Constants {
 		private static final double kSlipCurrentA = 300.0;
 
 		// Theoretical free speed (m/s) at 12v applied output;
-		public static final double kSpeedAt12VoltsMetersPerSecond = 5.13;
+		public static final double kSpeedAt12VoltsMetersPerSecond = 9.46;
 
 		// Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
 		private static final double kCoupleRatio = 3.5714285714285716;
@@ -119,23 +122,25 @@ public final class Constants {
 		private static final int kFrontRightDriveMotorId = 01;
 		private static final int kFrontRightSteerMotorId = 02;
 		private static final int kFrontRightEncoderId = 03;
-		private static final double kFrontRightEncoderOffset = -0.49658203125;
+		private static final double kFrontRightEncoderOffset = -0.38134765625;
 		private static final double kFrontRightXPosInches = driveBaseWidth / 2;
-		private static final double kFrontRightYPosInches = driveBaseHeight / 2;
-
+		private static final double kFrontRightYPosInches = -driveBaseHeight / 2;
+		/* Steer motor inverted (technically un inverted) */
+		
 		// Front Left
 		private static final int kFrontLeftDriveMotorId = 11;
 		private static final int kFrontLeftSteerMotorId = 12;
 		private static final int kFrontLeftEncoderId = 13;
-		private static final double kFrontLeftEncoderOffset = 0.442138671875;
+		private static final double kFrontLeftEncoderOffset = -0.31982421875;
 		private static final double kFrontLeftXPosInches = driveBaseWidth / 2;
-		private static final double kFrontLeftYPosInches = -driveBaseHeight / 2;
+		private static final double kFrontLeftYPosInches = driveBaseHeight / 2;
+		/* Drive motor inverted */
 
 		// Back Left
 		private static final int kBackLeftDriveMotorId = 21;
 		private static final int kBackLeftSteerMotorId = 22;
 		private static final int kBackLeftEncoderId = 23;
-		private static final double kBackLeftEncoderOffset = -0.34814453125;
+		private static final double kBackLeftEncoderOffset = -0.181396484375;
 		private static final double kBackLeftXPosInches = -driveBaseWidth / 2;
 		private static final double kBackLeftYPosInches = driveBaseHeight;
 
@@ -143,19 +148,18 @@ public final class Constants {
 		private static final int kBackRightDriveMotorId = 31;
 		private static final int kBackRightSteerMotorId = 32;
 		private static final int kBackRightEncoderId = 33;
-		private static final double kBackRightEncoderOffset = -0.076171875;
+		private static final double kBackRightEncoderOffset = -0.10498046875;
 		private static final double kBackRightXPosInches = -driveBaseWidth / 2;
 		private static final double kBackRightYPosInches = -driveBaseHeight / 2;
 
 		public static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
 				kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset,
 				Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches),
-				kInvertLeftSide);
-
+				kInvertLeftSide).withDriveMotorInverted(true);
 		public static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
 				kFrontRightSteerMotorId, kFrontRightDriveMotorId, kFrontRightEncoderId, kFrontRightEncoderOffset,
 				Units.inchesToMeters(kFrontRightXPosInches), Units.inchesToMeters(kFrontRightYPosInches),
-				kInvertRightSide);
+				kInvertRightSide).withSteerMotorInverted(false);
 		public static final SwerveModuleConstants BackLeft = ConstantCreator.createModuleConstants(
 				kBackLeftSteerMotorId, kBackLeftDriveMotorId, kBackLeftEncoderId, kBackLeftEncoderOffset,
 				Units.inchesToMeters(kBackLeftXPosInches), Units.inchesToMeters(kBackLeftYPosInches), kInvertLeftSide);
@@ -304,12 +308,15 @@ public final class Constants {
 
 		public static final double kFeedForward = 0.5;
 
-		public static final double kArmMaxAngle = 0;
-		public static final double kArmMinAngle = 150;
+		/** 100 degrees */
+		public static final double kArmMaxAngle = 100;
+		/** 300 degrees */
+		public static final double kArmMinAngle = -65;
 
 		public static class SetPoints {
-			public static final double kIntakeAngle = 0;
-			public static final double kShootAngle = 30;
+			public static final double kSpeaker = -30;
+			public static final double kSpeakerClosestPoint = -60;
+			public static final double kAmp = 53.75;
 		}
 	}
 
