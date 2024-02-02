@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.Shooter.FineAdjust;
 import frc.robot.Commands.Shooter.SetPoint;
 import frc.robot.Commands.Shooter.Shoot;
+import frc.robot.Subsystems.Intake;
 import frc.robot.Subsystems.Shooter.Arm;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.Swerve.SwerveRequest;
@@ -87,15 +87,17 @@ public class RobotContainer {
 			new Trigger(() -> simController.getRawButtonPressed(3))
 					.onTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(1));
 
-			// new Trigger(() -> simController.getRawButtonPressed(3)).onTrue(new SetPoint(0).withTimeout(1));
-
 			new Trigger(() -> simController.getRawButtonPressed(2))
 					.onTrue(new InstantCommand(() -> drivetrain.seedFieldRelative()));
+
+			// new Trigger(() -> simController.getRawButtonPressed(3)).onTrue(new SetPoint(0).withTimeout(1));
 
 			// new Trigger(() -> simController.getRawButtonPressed(3))
 			// 		.whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(0)));
 
 			Arm.getInstance().setDefaultCommand(new FineAdjust(() -> -simController.getRawAxis(2)));
+
+			new Trigger(() -> simController.getRawButtonPressed(4)).onTrue(new InstantCommand(Intake.toggleDeploy));
 
 		}
 	}

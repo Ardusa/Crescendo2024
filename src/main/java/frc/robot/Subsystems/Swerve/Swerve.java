@@ -69,10 +69,6 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     }
 
     private void configurePathPlanner() {
-        // for (var moduleLocation : m_moduleLocations) {
-        // driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
-        // }
-
         AutoBuilder.configureHolonomic(
                 () -> this.getState().Pose, // Supplier of current robot pose
                 this::seedFieldRelative, // Consumer for seeding pose against auto

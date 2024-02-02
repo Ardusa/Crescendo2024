@@ -25,7 +25,9 @@ public class Shoot extends Command {
     }
 
     @Override
-    public void initialize() {}
+    public void initialize() {
+        shooter.loadPiece();
+    }
 
     @Override
     public void execute() {

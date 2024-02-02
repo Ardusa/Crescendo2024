@@ -46,8 +46,8 @@ public class Shooter extends SubsystemBase {
 
     public void shoot(double shooter, double feeder) {
         shootMotorRight.set(shooter);
-        feedMotor.set(feeder);
         shootMotorLeft.set(shooter);
+        feedMotor.set(feeder);
     }
 
     public void stop() {
@@ -65,6 +65,10 @@ public class Shooter extends SubsystemBase {
 
     public boolean getHolding() {
         return holding;
+    }
+
+    public void loadPiece() {
+        feedMotor.set(1);
     }
 
     @Override

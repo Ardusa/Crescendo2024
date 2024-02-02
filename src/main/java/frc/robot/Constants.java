@@ -320,6 +320,18 @@ public final class Constants {
 		}
 	}
 
+	public static class IntakeConstants {
+		public static final int intakeMotorID = 58;
+		public static final int intakeSolenoidID = 0;
+		public static final int intakeSolenoidID2 = 1;
+		public static final int intakeSolenoidFwdID = 0;
+		public static final int intakeSolenoidRevID = 0;
+		
+		public static final double kIntakeSpeed = 0.5;
+		public static final double kIntakeSpeedOut = -0.5;
+
+	}
+
 	public static class Lights {
 		public static final double blinkTime = 7.5;
 		public static final int blinkinPWM_ID = 0;
