@@ -11,6 +11,8 @@
       "/FMSInfo": "FMSInfo",
       "/Pose": "Field2d",
       "/SmartDashboard/Arm Mechanism": "Mechanism2d",
+      "/SmartDashboard/Arm Target Mechanism": "Mechanism2d",
+      "/SmartDashboard/Arm Target Profile": "Mechanism2d",
       "/SmartDashboard/Auton Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Mechanism": "Mechanism2d",
@@ -22,6 +24,16 @@
     },
     "windows": {
       "/SmartDashboard/Arm Mechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Arm Target Mechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Arm Target Profile": {
         "window": {
           "visible": true
         }

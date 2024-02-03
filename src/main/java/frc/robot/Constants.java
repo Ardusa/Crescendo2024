@@ -119,9 +119,9 @@ public final class Constants {
 				.withPigeon2Id(kPigeonId).withCANbusName(kCANbusName);
 
 		// Front Right
-		private static final int kFrontRightDriveMotorId = 01;
-		private static final int kFrontRightSteerMotorId = 02;
-		private static final int kFrontRightEncoderId = 03;
+		private static final int kFrontRightDriveMotorId = 21;
+		private static final int kFrontRightSteerMotorId = 22;
+		private static final int kFrontRightEncoderId = 20;
 		private static final double kFrontRightEncoderOffset = -0.38134765625;
 		private static final double kFrontRightXPosInches = driveBaseWidth / 2;
 		private static final double kFrontRightYPosInches = -driveBaseHeight / 2;
@@ -130,24 +130,24 @@ public final class Constants {
 		// Front Left
 		private static final int kFrontLeftDriveMotorId = 11;
 		private static final int kFrontLeftSteerMotorId = 12;
-		private static final int kFrontLeftEncoderId = 13;
+		private static final int kFrontLeftEncoderId = 10;
 		private static final double kFrontLeftEncoderOffset = -0.31982421875;
 		private static final double kFrontLeftXPosInches = driveBaseWidth / 2;
 		private static final double kFrontLeftYPosInches = driveBaseHeight / 2;
 		/* Drive motor inverted */
 
 		// Back Left
-		private static final int kBackLeftDriveMotorId = 21;
-		private static final int kBackLeftSteerMotorId = 22;
-		private static final int kBackLeftEncoderId = 23;
+		private static final int kBackLeftDriveMotorId = 31;
+		private static final int kBackLeftSteerMotorId = 32;
+		private static final int kBackLeftEncoderId = 30;
 		private static final double kBackLeftEncoderOffset = -0.181396484375;
 		private static final double kBackLeftXPosInches = -driveBaseWidth / 2;
 		private static final double kBackLeftYPosInches = driveBaseHeight;
 
 		// Back Right
-		private static final int kBackRightDriveMotorId = 31;
-		private static final int kBackRightSteerMotorId = 32;
-		private static final int kBackRightEncoderId = 33;
+		private static final int kBackRightDriveMotorId = 41;
+		private static final int kBackRightSteerMotorId = 42;
+		private static final int kBackRightEncoderId = 40;
 		private static final double kBackRightEncoderOffset = -0.10498046875;
 		private static final double kBackRightXPosInches = -driveBaseWidth / 2;
 		private static final double kBackRightYPosInches = -driveBaseHeight / 2;
@@ -281,9 +281,9 @@ public final class Constants {
 	}
 
 	public static class BeltConstants {
-		public static final int feedMotor = 60;
-		public static final int shootMotorLeft = 61;
-		public static final int shootMotorRight = 62;
+		public static final int feedMotor = 54;
+		public static final int shootMotorLeft = 51;
+		public static final int shootMotorRight = 52;
 		public static final boolean feedIsInverted = true;
 		public static final boolean rightShootIsInverted = true;
 		public static final boolean leftShootIsInverted = false;
@@ -303,15 +303,20 @@ public final class Constants {
 	}
 
 	public static class ArmConstants {
-		public static final int armMotorID = 59;
-		public static final int armEncoderID = 61;
+		public static final int armMotorID = 53;
+		public static final int armEncoderID = 50;
 
 		public static final double kFeedForward = 0.5;
 
+		
 		/** 100 degrees */
 		public static final double kArmMaxAngle = 100;
 		/** 300 degrees */
 		public static final double kArmMinAngle = -65;
+		
+		public static final double kArmRangeOfMotion = kArmMaxAngle - (kArmMinAngle);
+
+		public static final double shooterOffset = 58.6;
 
 		public static class SetPoints {
 			public static final double kSpeaker = -30;

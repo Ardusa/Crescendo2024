@@ -29,7 +29,7 @@ public class Telemetry {
     public Telemetry() {
         MaxSpeed = Constants.SwerveConstants.kMaxSpeedMetersPerSecond;
         SignalLogger.start();
-        field = (Field2d) SmartDashboard.getData("Field");
+        field = Robot.mField;
     }
 
     /* Robot speeds for general checking */
