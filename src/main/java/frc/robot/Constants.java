@@ -36,6 +36,10 @@ public final class Constants {
 	}
 	
 	public class SwerveConstants {
+		public enum Target {
+			kSpeaker, kAmp, None
+		}
+
 		public static final double slowDownMultiplier = 0.5;
 		public static final double kMaxSpeedMetersPerSecond = 6;
 		public static final double kMaxAngularSpeedMetersPerSecond = 3 * Math.PI;
@@ -257,8 +261,9 @@ public final class Constants {
 		public static final String kFieldObjectName = "path";
 	}
 
-	public static class motorConstants {
+	public static class MotorConstants {
 		public static final double falconFreeSpeedRPM = 6380.0;
+		public static final double FalconRotorLoadThresholdRPM = 1000;
 
 		/* Kraken x60 Info */
 		public static class Kraken {
@@ -281,12 +286,12 @@ public final class Constants {
 	}
 
 	public static class BeltConstants {
-		public static final int feedMotor = 54;
+		public static final int feedMotor = 60;
 		public static final int shootMotorLeft = 51;
 		public static final int shootMotorRight = 52;
 		public static final boolean feedIsInverted = true;
-		public static final boolean rightShootIsInverted = true;
-		public static final boolean leftShootIsInverted = false;
+		public static final boolean rightShootIsInverted = false;
+		public static final boolean leftShootIsInverted = true;
 		public static final boolean intakeIsPositive = true;
 
 		public static final double kBeltSpeedSpeaker = 0.1;
@@ -312,16 +317,17 @@ public final class Constants {
 		/** 100 degrees */
 		public static final double kArmMaxAngle = 100;
 		/** 300 degrees */
-		public static final double kArmMinAngle = -65;
+		public static final double kArmMinAngle = -60;
 		
 		public static final double kArmRangeOfMotion = kArmMaxAngle - (kArmMinAngle);
 
-		public static final double shooterOffset = 58.6;
+		public static final double shooterOffset = 58.2;
 
 		public static class SetPoints {
 			public static final double kSpeaker = -30;
 			public static final double kSpeakerClosestPoint = -60;
 			public static final double kAmp = 53.75;
+			public static final double kIntake = -50;
 		}
 	}
 

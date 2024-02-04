@@ -1,6 +1,5 @@
 package frc.robot.Commands.Shooter;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Subsystems.Shooter.Arm;
@@ -9,7 +8,7 @@ public class HoldToPosition extends Command {
     private Arm mArm;
     private double shooterExtensionSetpoint, shooterSetpoint;
     private double error = 0;
-    private double rateOfMotion = 1;
+    private double rateOfMotion = 1.0;
 
     /**
      * Set the shooter to a specific position
@@ -39,38 +38,39 @@ public class HoldToPosition extends Command {
 
     @Override
     public void execute() {
-
         if (!mArm.validSetpoint(shooterSetpoint)) {
             this.end(true);
         }
 
         error = shooterExtensionSetpoint - mArm.getShooterExtensionPosition();
 
-        if (Math.abs(error) > 0.5) {
-            mArm.aim(error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion));
+        if (Math.abs(error) > 0.05) {
+            mArm.aimRaw(error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion));
+        } else {
+            end(false);
         }
+
         mArm.setArmTarget(shooterExtensionSetpoint);
 
-        if (DriverStation.isTest()) {
+        // if (DriverStation.isTest()) {
             System.out.println("\n*************************** Debug Stats (execute) ***************************");
             System.out.println("Shooter position: " + mArm.getArmPosition());
             System.out.println("Shooter target position: " + shooterSetpoint);
             System.out.println("Error: " + error);
             System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
             System.out.println("*************************** Debug Stats (execute) ***************************\n");
-        }
+        // }
     }
 
     @Override
     public boolean isFinished() {
-        return mArm.isInRangeOfTarget(shooterExtensionSetpoint);
+        return false;
+        // return mArm.isInRangeOfTarget(shooterExtensionSetpoint);
     }
 
     @Override
     public void end(boolean interrupted) {
-        if (interrupted) {
-            mArm.stop();
-        }
+        mArm.stop();
         System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
     }
 }

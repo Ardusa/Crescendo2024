@@ -1,15 +1,20 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Commands.Shooter.FineAdjust;
 import frc.robot.Commands.Shooter.HoldToPosition;
-import frc.robot.Commands.Shooter.Shoot;
+import frc.robot.Commands.Shooter.SetPoint;
+import frc.robot.Commands.Shooter.FeedAndShoot;
 import frc.robot.Subsystems.Shooter.Arm;
+import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.Swerve.SwerveRequest;
 import frc.robot.Subsystems.Swerve.SwerveModule.DriveRequestType;
@@ -23,6 +28,7 @@ public class RobotContainer {
 
 	private final Swerve drivetrain = Swerve.getInstance();
 	private final Arm mArm = Arm.getInstance();
+	private final Shooter mShooter = Shooter.getInstance();
 
 	private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -44,28 +50,31 @@ public class RobotContainer {
 						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 						.withRotationalRate(
 								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
-						.withSlowDown(xDrive.rightBumper().getAsBoolean(), 0.5)
-
-				// negative X (left)
+						.withSlowDown(xDrive.getHID().getRightBumper(), 0.5)
 				).ignoringDisable(true));
 
-		// xDrive.a().whileTrue(drivetrain.applyRequest(() -> brake));
-		// xDrive.b().whileTrue(drivetrain
-		// 		.applyRequest(() -> point.withModuleDirection(new Rotation2d(-xDrive.getLeftY(), -xDrive.getLeftX()))));
+		xDrive.a().whileTrue(drivetrain.applyRequest(() -> brake));
+		xDrive.b().whileTrue(drivetrain
+				.applyRequest(() -> point.withModuleDirection(new Rotation2d(-xDrive.getLeftY(), -xDrive.getLeftX()))));
+
 		xDrive.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
-		// xDrive.x().whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(1)));
+		xDrive.x().whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(1).withVelocityY(1)));
 
-		Manip.y().whileTrue(new HoldToPosition(Constants.ArmConstants.SetPoints.kAmp));
-		Manip.x().whileTrue(new HoldToPosition(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint));
-		Manip.b().whileTrue(new HoldToPosition(0));
-		Manip.a().whileTrue(new HoldToPosition(Constants.ArmConstants.SetPoints.kSpeaker));
+		// Manip.y().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kAmp));
+		// Manip.x().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint));
 
-		Manip.leftBumper().whileTrue(new Shoot());
+		Manip.y().whileTrue(new RunCommand(() -> mShooter.SetRpm(SmartDashboard.getNumber("left/setRpm", 0),
+				SmartDashboard.getNumber("right/setRpm", 0))));
+
+		Manip.b().whileTrue(new SetPoint(0));
+		Manip.a().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
+
+		Manip.leftBumper().whileTrue(new FeedAndShoot());
 
 		mArm.setDefaultCommand(new FineAdjust(() -> -Manip.getRightY()));
 
-		// reset the field-centric heading on left bumper press
+		mShooter.setDefaultCommand(new RunCommand(() -> mShooter.stop(), mShooter));
 
 		/* Set Sim Binds */
 		if (Robot.isSimulation()) {

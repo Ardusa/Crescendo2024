@@ -1,8 +1,10 @@
 package frc.robot.Subsystems.Shooter;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -21,15 +23,17 @@ import frc.robot.Custom.LoggyThings.LoggyCANcoder;
 import frc.robot.Custom.LoggyThings.LoggyTalonFX;
 
 /**
- * To zero, first put the arm in a position where the shooter extension bars are parrallel to the long shooter bars
- * Zero the armCoder and then write enter the Magnet Offset into line 61
- * 
+ * TODO: To zero, first put the arm in a position where the shooter is parallel
+ * to the ground, then, in tuner X, zero the armCoder
  */
 public class Arm extends SubsystemBase {
     private static Arm mInstance;
     private LoggyTalonFX armMotor;
     private LoggyCANcoder armCoder;
     private double targetPosition = 0;
+
+    private VelocityDutyCycle velocityDutyCycle;
+    private MotionMagicTorqueCurrentFOC motionMagicDutyCycle;
 
     private Mechanism2d armMechanism;
     private MechanismLigament2d shooterLigament, shooterExtension, elbowLigament;
@@ -40,8 +44,6 @@ public class Arm extends SubsystemBase {
     public Runnable feedForward = () -> {
         armMotor.set(0.1);
     };
-
-    // private final double shooterOffset = -1.4;
 
     public static Arm getInstance() {
         if (mInstance == null) {
@@ -54,9 +56,8 @@ public class Arm extends SubsystemBase {
     @Override
     public void periodic() {
         if (Robot.isReal()) {
-            shooterExtension.setAngle(getShooterExtensionPosition());
+            shooterExtension.setAngle(getShooterExtensionPosition() - 90);
         }
-        // System.out.println("Target: " + targetPosition);
         simShooterExtension.setAngle(targetPosition - 90);
     }
 
@@ -65,12 +66,13 @@ public class Arm extends SubsystemBase {
         CANcoderConfiguration armCoderConfig = new CANcoderConfiguration();
 
         /*
-         * Do this in code so that it doesnt have to be done when cancoder gets replaced
+         * Do this directly on the CANcoder, so as to not reset the zero position
          */
         armCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         armCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
-        armCoderConfig.MagnetSensor.MagnetOffset = -0.102783203125; // Try leaving this empty and seeing if it works automatically
-        armCoder.getConfigurator().apply(armCoderConfig);
+
+        /* Do not apply */
+        // armCoder.getConfigurator().apply(armCoderConfig);
 
         armMotor = new LoggyTalonFX(Constants.ArmConstants.armMotorID, false);
         TalonFXConfiguration armMotorConfig = new TalonFXConfiguration();
@@ -78,13 +80,29 @@ public class Arm extends SubsystemBase {
         armMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.SyncCANcoder;
         armMotorConfig.Feedback.RotorToSensorRatio = 50;
         armMotorConfig.Feedback.FeedbackRemoteSensorID = armCoder.getDeviceID();
+
+        armMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        armMotorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+        armMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = Units
+                .degreesToRotations(Constants.ArmConstants.kArmMaxAngle);
+        armMotorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Units
+                .degreesToRotations(Constants.ArmConstants.kArmMinAngle);
+
+
+        MotionMagicConfigs motionMagicConfigs = armMotorConfig.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = 0.25;
+        motionMagicConfigs.MotionMagicAcceleration = 0.25;
+
+        armMotorConfig.Slot0.kV = 05;
+        armMotorConfig.Slot0.kP = 100;
+        armMotorConfig.Slot0.kI = 01;
+
+        armMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+        motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(0);
+        motionMagicDutyCycle.Slot = 0;
         armMotor.getConfigurator().apply(armMotorConfig);
-        armMotor.setNeutralMode(NeutralModeValue.Brake);
-
-        // armControl = new PositionDutyCycle(getArmPosition()).withSlot(0);
-        // armControl.withFeedForward(0.01);
-
-        armMotor.getConfigurator().apply(new Slot0Configs().withKP(0.1).withKI(0).withKD(0));
 
         double shooterHeightInches = 22;
         double shooterLengthInches = 9.5;
@@ -95,7 +113,7 @@ public class Arm extends SubsystemBase {
         double rootYInches = 4;
 
         if (Robot.isReal()) {
-            /* Motor Profile */
+            /* Motor Profile Mechanism */
             armMechanism = new Mechanism2d(0.7493 * 2, Units.feetToMeters(3));
 
             shooterLigament = new MechanismLigament2d("Shooter Bars", Units.inchesToMeters(shooterHeightInches), 90, 9,
@@ -112,10 +130,9 @@ public class Arm extends SubsystemBase {
             SmartDashboard.putData("Arm Motor Profile", armMechanism);
         }
 
-
         /* Create Target Mechanism */
         simArmMechanism = new Mechanism2d(0.7493 * 2, Units.feetToMeters(3));
-        
+
         simShooterLigament = new MechanismLigament2d("Shooter Bars", Units.inchesToMeters(shooterHeightInches), 90, 9,
                 new Color8Bit(Color.kRed));
 
@@ -130,22 +147,23 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putData("Arm Target Profile", simArmMechanism);
     }
 
-    // /** Still need to write code but will aim arm at the slot using vision */
-    // public void aim() {
-    //     /* TODO: Set up an algorithm to aim for slot/apriltag */
-    //     /* look into this
-    //     new ArmFeedforward(0, 0, 0).
-    //     */
-    // }
+    /** Still need to write code but will aim arm at the slot using vision */
+    public double aim() {
+        return Constants.ArmConstants.SetPoints.kSpeaker;
+        /* TODO: Set up an algorithm to aim for slot/apriltag */
+        /*
+         * look into this new ArmFeedforward(0, 0, 0).
+         */
+    }
 
     /**
-     * 
+     * whether the arm is within 0.5 degrees of the target
      * 
      * @param target target position in degrees
      * @return true if in range or false if out of range
      */
     public boolean isInRangeOfTarget(double target) {
-        if (Math.abs(getArmPosition() - target) < 5) {
+        if (Math.abs(getArmPosition() - target) < 0.5) {
             return true;
         } else {
             return false;
@@ -153,7 +171,8 @@ public class Arm extends SubsystemBase {
     }
 
     /**
-     * Whether or not the SHOOTER is within the allowable range of motion
+     * Whether or not the Arm is within the allowable range of motion
+     * 
      * @param setpoint the Shooter setpoint in degrees
      * @return true if within range, false if not
      */
@@ -166,19 +185,36 @@ public class Arm extends SubsystemBase {
     }
 
     /**
-     * supply a specific value [-1,1] to the arm motor
+     * supply a specific value [-1,1] to the arm motor, has a deadzone of 0.06
+     * 
      * @param setVal the value to set the arm motor to [-1,1]
      */
-    public void aim(double setVal) {        
+    public void aim(double setVal) {
         if (Math.abs(setVal) <= 0.06) {
-            setVal = 0.02;
+            setVal = 0.0;
+            if (getArmPosition() < 35) {
+                setVal = 0.02;
+            }
         }
 
-        if (!validSetpoint((5 * setVal) + getArmPosition())) {
+        armMotor.set(setVal);
+    }
+
+    /**
+     * supply a specific value [-1,1] to the arm motor
+     * 
+     * @param setVal the value to set the arm motor to [-1,1]
+     */
+    public void aimRaw(double setVal) {
+        if (Math.abs(setVal) > 0.25) {
             setVal = 0;
         }
 
         armMotor.set(setVal);
+    }
+
+    public void aimVelocity(double velocity) {
+        armMotor.setControl(velocityDutyCycle.withVelocity(velocity));
     }
 
     /**
@@ -188,9 +224,9 @@ public class Arm extends SubsystemBase {
      */
     public double getArmPosition() {
         if (Robot.isSimulation()) {
-            return simShooterExtension.getAngle() - Constants.ArmConstants.shooterOffset + 90;
+            return simShooterExtension.getAngle();
         }
-        return (armCoder.getAbsolutePosition().getValueAsDouble() / 2) - Constants.ArmConstants.shooterOffset + 90;
+        return Units.rotationsToDegrees(armMotor.getPosition().getValueAsDouble());
     }
 
     public double getShooterExtensionPosition() {
@@ -203,9 +239,22 @@ public class Arm extends SubsystemBase {
 
     /**
      * Sets the Sim Arm Target Mechanism to a specific position
+     * 
      * @param target in degrees
      */
     public void setArmTarget(double target) {
         targetPosition = target;
+    }
+
+    public double getVelocityRotations() {
+        return armMotor.getVelocity().getValueAsDouble();
+    }
+
+    public double getVelocity() {
+        return armMotor.getVelocity().getValueAsDouble() * 360;
+    }
+
+    public void setMotionMagic(double position) {
+        armMotor.setControl(motionMagicDutyCycle.withPosition(position));
     }
 }

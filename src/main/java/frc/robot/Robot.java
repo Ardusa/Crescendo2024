@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -16,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Commands.PathPlannerCommand;
+import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
 
 public class Robot extends TimedRobot {
@@ -26,6 +28,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void robotInit() {
+		
 		new RobotContainer();
 
 		SmartDashboard.putData("Field", mField);
@@ -94,13 +97,17 @@ public class Robot extends TimedRobot {
 	}
 
 	@Override
-	public void teleopInit() {}
+	public void teleopInit() {
+		Shooter.getInstance().setNeutralMode(NeutralModeValue.Coast);
+	}
 
 	@Override
 	public void teleopPeriodic() {}
 
 	@Override
-	public void teleopExit() {}
+	public void teleopExit() {
+		Shooter.getInstance().setNeutralMode(NeutralModeValue.Brake);
+	}
 
 	@Override
 	public void testInit() {

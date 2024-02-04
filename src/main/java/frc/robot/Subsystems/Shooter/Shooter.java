@@ -1,7 +1,10 @@
 package frc.robot.Subsystems.Shooter;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Custom.LoggyThings.LoggyTalonFX;
@@ -10,12 +13,7 @@ public class Shooter extends SubsystemBase {
     private static Shooter mInstance;
     /** shootMotorRight is the master motor */
     private LoggyTalonFX shootMotorRight, shootMotorLeft, feedMotor;
-
-    public enum Target {
-        kSpeaker,
-        kAmp,
-        None
-    }
+    private VelocityVoltage shootPid = new VelocityVoltage(0);
 
     private boolean holding;
 
@@ -27,21 +25,44 @@ public class Shooter extends SubsystemBase {
         return mInstance;
     }
 
-    private Shooter() {
-        shootMotorRight = new LoggyTalonFX(Constants.BeltConstants.shootMotorRight, false);
-        shootMotorRight.setInverted(Constants.BeltConstants.rightShootIsInverted);
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("left/actual Rpm", shootMotorLeft.getVelocity().getValueAsDouble() * 60);
+        SmartDashboard.putNumber("right/actual Rpm", shootMotorRight.getVelocity().getValueAsDouble() * 60);
 
+        SmartDashboard.putNumber("left/Supply Current", shootMotorLeft.getSupplyCurrent().getValueAsDouble());
+        SmartDashboard.putNumber("right/Supply Current", shootMotorRight.getSupplyCurrent().getValueAsDouble());
+    }
+
+    private Shooter() {
+        holding = false;
+
+        shootMotorRight = new LoggyTalonFX(Constants.BeltConstants.shootMotorRight, false);
         shootMotorLeft = new LoggyTalonFX(Constants.BeltConstants.shootMotorLeft, false);
-        shootMotorLeft.setInverted(Constants.BeltConstants.leftShootIsInverted);
+
+        TalonFXConfiguration fxConfig = new TalonFXConfiguration();
+        fxConfig.CurrentLimits.SupplyCurrentLimit = 30;
+        fxConfig.CurrentLimits.SupplyCurrentThreshold = 60;
+        fxConfig.CurrentLimits.SupplyTimeThreshold = 0.5;
+        fxConfig.MotorOutput.PeakReverseDutyCycle = 0;
+        fxConfig.Slot0.kP = 0.2;
+        fxConfig.Slot0.kI = 0.07;
+        fxConfig.Slot0.kV = 2 / 16;
+        fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        fxConfig.Feedback.SensorToMechanismRatio = 14 / 20;
+        shootMotorLeft.getConfigurator().apply(fxConfig);
+        shootMotorRight.getConfigurator().apply(fxConfig);
 
         feedMotor = new LoggyTalonFX(Constants.BeltConstants.feedMotor, false);
         feedMotor.setInverted(Constants.BeltConstants.feedIsInverted);
         
-        shootMotorRight.setNeutralMode(NeutralModeValue.Coast);
-        shootMotorLeft.setNeutralMode(NeutralModeValue.Coast);
         feedMotor.setNeutralMode(NeutralModeValue.Coast);
 
-        holding = false;
+        shootMotorRight.setInverted(Constants.BeltConstants.rightShootIsInverted);
+        shootMotorLeft.setInverted(Constants.BeltConstants.leftShootIsInverted);
+
+        SmartDashboard.putNumber("left/setRpm", 1000);
+        SmartDashboard.putNumber("right/setRpm", 1000);
     }
 
     public void shoot(double shooter, double feeder) {
@@ -52,6 +73,7 @@ public class Shooter extends SubsystemBase {
 
     public void stop() {
         shootMotorRight.set(0);
+        shootMotorLeft.set(0);
         feedMotor.set(0);
     }
 
@@ -71,12 +93,20 @@ public class Shooter extends SubsystemBase {
         feedMotor.set(1);
     }
 
-    @Override
-    public void periodic() {
-        // System.out.println("Shooter alive");
-        // if (Robot.isReal()) {
-        //     SmartDashboard.putNumber("Velocity Left Belt", shootMotorRight.getVelocity().getValue());
-        //     SmartDashboard.putNumber("Velocity Right Belt", shootMotorLeft.getVelocity().getValue());
-        // }
+    public boolean getSpeedChange() {
+        if (shootMotorRight.getVelocity().getValueAsDouble() < Constants.MotorConstants.FalconRotorLoadThresholdRPM) {
+            return true;
+        }
+        return false;
+    }
+
+    public void SetRpm(double left, double right) {
+        shootMotorRight.setControl(shootPid.withVelocity(right / 60));
+        shootMotorLeft.setControl(shootPid.withVelocity(left / 60));
+    }
+
+    public void setNeutralMode(NeutralModeValue mode) {
+        shootMotorRight.setNeutralMode(mode);
+        shootMotorLeft.setNeutralMode(mode);
     }
 }

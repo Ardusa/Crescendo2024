@@ -2,43 +2,44 @@ package frc.robot.Commands.Shooter;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants;
 import frc.robot.Subsystems.Shooter.Shooter;
 
-public class Shoot extends Command {
-    private final Shooter shooter = Shooter.getInstance();
+public class FeedAndShoot extends Command {
+    private final Shooter shooter;
     private Timer timer;
 
-    public Shoot() {
+    public FeedAndShoot() {
+        timer = new Timer();
+        shooter = Shooter.getInstance();
         this.setName("Shoot");
         this.addRequirements(shooter);
     }
 
     @Override
     public void initialize() {
-        timer = new Timer();
-        timer.start();
+        timer.restart();
     }
 
     @Override
     public void execute() {
-        shooter.shoot(1, 1);
-        
-        if (timer.get() > 0.5) {
-            end(true);
+        if (timer.get() < 0.2) {
+            shooter.shoot(0, 0.3);
+        } else {
+            shooter.shoot(01, 0);
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-        if (interrupted) {
-            shooter.stop();
+        shooter.stop();
+
+        if (!(timer.get() < 0.3)) {
             shooter.toggleHolding();
         }
     }
 
     @Override
     public boolean isFinished() {
-        return !shooter.getHolding();
+        return timer.get() > 0.5;
     }
 }

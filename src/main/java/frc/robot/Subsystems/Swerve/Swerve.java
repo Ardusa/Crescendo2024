@@ -135,4 +135,13 @@ public class Swerve extends SwerveDrivetrain implements Subsystem {
     public Pose2d getPose() {
         return getState().Pose;
     }
+
+    public Constants.SwerveConstants.Target whatAmILookingAt() {
+        double rotation = getPose().getRotation().getDegrees();
+        if (rotation > -60 && rotation < -120) {
+            return Constants.SwerveConstants.Target.kAmp;
+        } else {
+            return Constants.SwerveConstants.Target.kSpeaker;
+        }
+    }
 }

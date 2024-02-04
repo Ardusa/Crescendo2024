@@ -1,76 +1,79 @@
-// package frc.robot.Commands.Shooter;
+package frc.robot.Commands.Shooter;
 
-// import edu.wpi.first.wpilibj.DriverStation;
-// import edu.wpi.first.wpilibj2.command.Command;
-// import frc.robot.Constants;
-// import frc.robot.Subsystems.Shooter.Arm;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
+import frc.robot.Subsystems.Shooter.Arm;
 
-// public class SetPoint extends Command {
-//     private Arm mArm;
-//     private double shooterExtensionSetpoint, shooterSetpoint;
-//     private double error = 0;
-//     private double rateOfMotion = 1;
+public class SetPoint extends Command {
+    private Arm mArm;
+    private double shooterExtensionSetpoint, armSetpoint;
+    private double error = 0;
+    private Timer timer;
+    private boolean debugMode = true;
 
-//     /**
-//      * Set the shooter to a specific position
-//      * 
-//      * @param target in degrees of THE SHOOTER, not the extension bar
-//      */
-//     public SetPoint(double target) {
-//         mArm = Arm.getInstance();
-//         shooterExtensionSetpoint = target + Constants.ArmConstants.shooterOffset;
-//         shooterSetpoint = target;
+    /**
+     * Set the shooter to a specific position
+     * 
+     * @param target in degrees of THE SHOOTER, not the extension bar
+     */
+    public SetPoint(double target) {
+        timer = new Timer();
+        mArm = Arm.getInstance();
+        shooterExtensionSetpoint = target + Constants.ArmConstants.shooterOffset;
+        armSetpoint = target;
 
-//         this.setName("Aim for " + shooterSetpoint + " degrees");
-//         this.addRequirements(mArm);
-//     }
+        this.setName("Setpoint: " + armSetpoint + " degrees");
+        this.addRequirements(mArm);
+    }
 
-//     @Override
-//     public void initialize() {
-//         error = shooterExtensionSetpoint - mArm.getShooterExtensionPosition();
+    @Override
+    public void initialize() {
+        mArm.setArmTarget(shooterExtensionSetpoint);
+        timer.restart();
 
-//         System.out.println("\n*************************** Debug Stats (initialize) ***************************");
-//         System.out.println("Shooter position: " + mArm.getArmPosition());
-//         System.out.println("Shooter target position: " + shooterSetpoint);
-//         System.out.println("Error: " + error);
-//         System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
-//         System.out.println("*************************** Debug Stats (initialize) ***************************\n");
-//     }
+        error = armSetpoint - mArm.getArmPosition();
 
-//     @Override
-//     public void execute() {
+        if (debugMode) {
+            System.out.println("\n*************************** Debug Stats (initialize) ***************************");
+            System.out.println("Shooter position: " + mArm.getArmPosition());
+            System.out.println("Shooter target position: " + armSetpoint);
+            System.out.println("Error: " + error);
+            // System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
+            System.out.println("*************************** Debug Stats (initialize) ***************************\n");
+        }
+    }
 
-//         if (!mArm.validSetpoint(shooterSetpoint)) {
-//             this.end(true);
-//         }
+    @Override
+    public void execute() {
+        if (!mArm.validSetpoint(armSetpoint)) {
+            this.end(true);
+        }
 
-//         error = shooterExtensionSetpoint - mArm.getShooterExtensionPosition();
+        mArm.setMotionMagic(armSetpoint);
 
-//         if (Math.abs(error) > 0.5) {
-//             mArm.aim(error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion));
-//         }
-//         mArm.setArmTarget(shooterExtensionSetpoint);
+        if (debugMode) {
+            System.out.println("\n*************************** Debug Stats (execute) ***************************");
+            System.out.println("Shooter position: " + mArm.getArmPosition());
+            System.out.println("Shooter target position: " + armSetpoint);
+            System.out.println("Error: " + error);
+            // System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
+            System.out.println("*************************** Debug Stats (execute) ***************************\n");
+        }
+    }
 
-//         if (DriverStation.isTest()) {
-//             System.out.println("\n*************************** Debug Stats (execute) ***************************");
-//             System.out.println("Shooter position: " + mArm.getArmPosition());
-//             System.out.println("Shooter target position: " + shooterSetpoint);
-//             System.out.println("Error: " + error);
-//             System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
-//             System.out.println("*************************** Debug Stats (execute) ***************************\n");
-//         }
-//     }
+    @Override
+    public boolean isFinished() {
+        return mArm.isInRangeOfTarget(armSetpoint);
+    }
 
-//     @Override
-//     public boolean isFinished() {
-//         return mArm.isInRangeOfTarget(shooterExtensionSetpoint);
-//     }
-
-//     @Override
-//     public void end(boolean interrupted) {
-//         if (interrupted) {
-//             mArm.stop();
-//         }
-//         System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
-//     }
-// }
+    @Override
+    public void end(boolean interrupted) {
+        if (interrupted) {
+            SmartDashboard.putNumber("Velocity", 0);
+        }
+        mArm.stop();
+        System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
+    }
+}

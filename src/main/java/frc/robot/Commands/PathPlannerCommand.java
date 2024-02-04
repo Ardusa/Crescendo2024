@@ -9,15 +9,11 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.Commands.Shooter.HoldToPosition;
-import frc.robot.Commands.Shooter.Shoot;
 import frc.robot.Subsystems.Shooter.Arm;
 import frc.robot.Subsystems.Swerve.Swerve;
 
@@ -53,13 +49,14 @@ public class PathPlannerCommand extends Command {
     public void initialize() {
         swerve.seedFieldRelative(startPose);
         System.out.println("Starting Pose: " + startPose.toString());
-        autoGroup = new SequentialCommandGroup(new HoldToPosition(Constants.ArmConstants.SetPoints.kAmp),
+        // autoGroup = new SequentialCommandGroup(new HoldToPosition(Constants.ArmConstants.SetPoints.kAmp),
                 // new Shoot().unless(() -> new WaitCommand(0.5).isFinished()),
-                auto);
-        SmartDashboard.putData("Auto", autoGroup);
-        autoGroup.schedule();
-        // auto.schedule();
+                // auto);
+        // SmartDashboard.putData("Auto", autoGroup);
+        // autoGroup.schedule();
+        auto.schedule();
     }
+    
 
     @Override
     public void execute() {}
