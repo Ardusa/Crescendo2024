@@ -6,9 +6,9 @@
     "Close Left Note"
   ],
   "autoFolders": [],
-  "defaultMaxVel": 5.0,
+  "defaultMaxVel": 9.46,
   "defaultMaxAccel": 5.0,
   "defaultMaxAngVel": 360.0,
   "defaultMaxAngAccel": 720.0,
-  "maxModuleSpeed": 5.13
+  "maxModuleSpeed": 9.46
 }

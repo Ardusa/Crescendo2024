@@ -2,6 +2,7 @@ package frc.robot.Commands.Shooter;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Subsystems.Shooter.Arm;
 import frc.robot.Subsystems.Shooter.Shooter;
 
 public class FeedAndShoot extends Command {
@@ -18,19 +19,27 @@ public class FeedAndShoot extends Command {
     @Override
     public void initialize() {
         timer.restart();
+        Arm.getInstance().setBrake(true);
     }
 
     @Override
     public void execute() {
-        if (timer.get() < 0.2) {
-            shooter.shoot(0, 0.3);
+        if (timer.get() < 02) {
+            shooter.shoot(1, 0.0001);
         } else {
-            shooter.shoot(01, 0);
+            shooter.shoot(1, 1);
         }
+        // if (timer.get() < 0.4) {
+        //     shooter.shoot(0, 0.3);
+        // } else {
+        //     shooter.shoot(01, 0);
+        // }
     }
 
     @Override
     public void end(boolean interrupted) {
+        shooter.setBrakeMode(true);
+        Arm.getInstance().setBrake(false);
         shooter.stop();
 
         if (!(timer.get() < 0.3)) {

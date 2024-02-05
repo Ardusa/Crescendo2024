@@ -8,8 +8,10 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
@@ -24,17 +26,20 @@ public class PathPlannerCommand extends Command {
     private Command auto;
     private Pose2d startPose;
     private SequentialCommandGroup autoGroup;
+    // private boolean debugMode = true;
+    private Timer timer;
 
     private static String lastAutoName;
 
     public PathPlannerCommand(String autoName, boolean shoot) {
-        // NamedCommands.registerCommand("Intake", new PrintCommand("Intake Command, PathPlanner"));
-        NamedCommands.registerCommand("Shoot",
-                new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.1));
-        NamedCommands.registerCommand("AimAndShoot", new AimAndShoot().withTimeout(2));
-        NamedCommands.registerCommand("Stow", new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5));
+        NamedCommands.registerCommand("Intake", new PrintCommand("Intake Command, PathPlanner"));
+        NamedCommands.registerCommand("Shoot", new PrintCommand("Shoot Command, PathPlanner"));
+        // new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.1));
+        NamedCommands.registerCommand("AimAndShoot", new AimAndShoot().withTimeout(0.3));
+        NamedCommands.registerCommand("Stow", new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.3));
 
         swerve = Swerve.getInstance();
+        timer = new Timer();
 
         try {
             startPose = new Pose2d(PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0)
@@ -56,15 +61,16 @@ public class PathPlannerCommand extends Command {
         autoGroup = new SequentialCommandGroup(
                 new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.5),
                 new FeedAndShoot().withTimeout(0.5),
-                new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5), auto);
+                new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5), auto,
+                new InstantCommand(() -> timer.stop()));
         autoGroup.setName("Autonomous Sequence");
-        SmartDashboard.putData("Auto", autoGroup);
+        timer.restart();
         autoGroup.schedule();
     }
 
     @Override
     public void execute() {
-        // System.out.println(NetworkTableInstance.getDefault().getTable("PathPlanner").getEntry("inaccuracy").getDouble(0));
+        NetworkTableInstance.getDefault().getTable("PathPlanner").getEntry("Auto Timer").setDouble(timer.get());
     }
 
     @Override

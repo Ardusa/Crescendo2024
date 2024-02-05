@@ -18,6 +18,7 @@
       "/SmartDashboard/Arm Mechanism": "Mechanism2d",
       "/SmartDashboard/Arm Target Mechanism": "Mechanism2d",
       "/SmartDashboard/Arm Target Profile": "Mechanism2d",
+      "/SmartDashboard/Arm/Target Profile": "Mechanism2d",
       "/SmartDashboard/Auto": "Command",
       "/SmartDashboard/Auton Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
@@ -26,6 +27,10 @@
       "/SmartDashboard/Module 1": "Mechanism2d",
       "/SmartDashboard/Module 2": "Mechanism2d",
       "/SmartDashboard/Module 3": "Mechanism2d",
+      "/SmartDashboard/Swerve/Module 0": "Mechanism2d",
+      "/SmartDashboard/Swerve/Module 1": "Mechanism2d",
+      "/SmartDashboard/Swerve/Module 2": "Mechanism2d",
+      "/SmartDashboard/Swerve/Module 3": "Mechanism2d",
       "/SmartDashboard/path": "Field2d"
     },
     "windows": {
@@ -39,7 +44,7 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Arm Target Profile": {
+      "/SmartDashboard/Arm/Target Profile": {
         "window": {
           "visible": true
         }

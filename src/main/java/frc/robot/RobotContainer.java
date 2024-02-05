@@ -3,17 +3,15 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Commands.Shooter.AimAndShoot;
 import frc.robot.Commands.Shooter.FeedAndShoot;
 import frc.robot.Commands.Shooter.FineAdjust;
 import frc.robot.Commands.Shooter.SetPoint;
 import frc.robot.Subsystems.Shooter.Arm;
-import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
 import frc.robot.Subsystems.Swerve.SwerveRequest;
 import frc.robot.Subsystems.Swerve.SwerveModule.DriveRequestType;
@@ -27,7 +25,6 @@ public class RobotContainer {
 
 	private final Swerve drivetrain = Swerve.getInstance();
 	private final Arm mArm = Arm.getInstance();
-	private final Shooter mShooter = Shooter.getInstance();
 
 	private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
 	private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -49,8 +46,7 @@ public class RobotContainer {
 						.withVelocityY(-xDrive.getLeftX() * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 						.withRotationalRate(
 								-xDrive.getRightX() * Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
-						.withSlowDown(xDrive.getHID().getRightBumper(), 0.5)
-				).ignoringDisable(true));
+						.withSlowDown(xDrive.getHID().getRightBumper(), 0.5)).ignoringDisable(true));
 
 		xDrive.a().whileTrue(drivetrain.applyRequest(() -> brake));
 		xDrive.b().whileTrue(drivetrain
@@ -63,17 +59,21 @@ public class RobotContainer {
 		// Manip.y().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kAmp));
 		// Manip.x().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint));
 
-		Manip.y().whileTrue(new RunCommand(() -> mShooter.SetRpm(SmartDashboard.getNumber("left/setRpm", 0),
-				SmartDashboard.getNumber("right/setRpm", 0)), mShooter).andThen(() -> mShooter.stop(), mShooter));
+		// Manip.y().whileTrue(new RunCommand(() -> mShooter.SetRpm(SmartDashboard.getNumber("Shooter/left motor/setRpm", 0),
+		// 		SmartDashboard.getNumber("Shooter/right motor/setRpm", 0)), mShooter).andThen(() -> mShooter.stop(), mShooter));
 
 		Manip.b().whileTrue(new SetPoint(0));
 		Manip.a().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
 
 		Manip.leftBumper().whileTrue(new FeedAndShoot());
 
+		// mArm.setDefaultCommand(new AimAndShoot());
+
 		// Manip.leftBumper().whileTrue(new RunCommand(() -> mShooter.loadPiece()));
 
 		mArm.setDefaultCommand(new FineAdjust(() -> -Manip.getRightY()));
+
+		// Manip.x().whileTrue(new AimAndShoot());
 
 		// mShooter.setDefaultCommand(new RunCommand(() -> System.out.println("taking shooter thing"), mShooter));
 
@@ -86,8 +86,8 @@ public class RobotContainer {
 							.withVelocityY(
 									-simController.getRawAxis(0) * Constants.SwerveConstants.kMaxSpeedMetersPerSecond)
 							.withRotationalRate(-simController.getRawAxis(3)
-									* Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond / 2)
-							.withSlowDown(simController.getRawButton(4), Constants.SwerveConstants.slowDownMultiplier))
+									* Constants.SwerveConstants.kMaxAngularSpeedMetersPerSecond)
+							.withSlowDown(simController.getRawButton(5), Constants.SwerveConstants.slowDownMultiplier))
 					.withName("xDrive"));
 
 			// new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(drivetrain.applyRequest(() -> brake));
@@ -101,7 +101,7 @@ public class RobotContainer {
 			new Trigger(() -> simController.getRawButtonPressed(3))
 					.whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
 
-			new Trigger(() -> simController.getRawButtonPressed(4)).whileTrue(new SetPoint(0));
+			new Trigger(() -> simController.getRawButtonPressed(4)).whileTrue(new AimAndShoot());
 
 			// new Trigger(() -> simController.getRawButtonPressed(2))
 			// 		.onTrue(new InstantCommand(() -> drivetrain.seedFieldRelative()));

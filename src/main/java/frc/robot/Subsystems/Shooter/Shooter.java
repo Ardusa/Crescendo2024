@@ -28,14 +28,19 @@ public class Shooter extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("left/actual Rpm", shootMotorLeft.getVelocity().getValueAsDouble() * 60);
-        SmartDashboard.putNumber("right/actual Rpm", shootMotorRight.getVelocity().getValueAsDouble() * 60);
+        // SmartDashboard.putNumber("Shooter/left motor/actual Rpm", shootMotorLeft.getVelocity().getValueAsDouble() * 60);
+        // SmartDashboard.putNumber("Shooter/right motor/actual Rpm", shootMotorRight.getVelocity().getValueAsDouble() * 60);
 
-        SmartDashboard.putNumber("left/Supply Current", shootMotorLeft.getSupplyCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("right/Supply Current", shootMotorRight.getSupplyCurrent().getValueAsDouble());
+        // SmartDashboard.putNumber("Shooter/left motor/Supply Current", shootMotorLeft.getSupplyCurrent().getValueAsDouble());
+        // SmartDashboard.putNumber("Shooter/right motor/Supply Current", shootMotorRight.getSupplyCurrent().getValueAsDouble());
+
+        // SmartDashboard.putNumber("", value);
     }
 
     private Shooter() {
+        SmartDashboard.putNumber("Shooter/left motor/setRpm", 1000);
+        SmartDashboard.putNumber("Shooter/right motor/setRpm", 1000);
+
         holding = false;
 
         shootMotorRight = new LoggyTalonFX(Constants.BeltConstants.shootMotorRight, false);
@@ -62,9 +67,6 @@ public class Shooter extends SubsystemBase {
         shootMotorLeft.setInverted(Constants.BeltConstants.leftShootIsInverted);
 
         // Music.getInstance().addFalcon(List.of(shootMotorLeft, shootMotorRight, feedMotor));
-
-        SmartDashboard.putNumber("left/setRpm", 1000);
-        SmartDashboard.putNumber("right/setRpm", 1000);
     }
 
     public void shoot(double shooter, double feeder) {
