@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Custom.LoggyThings.LoggyTalonFX;
+// import frc.robot.Subsystems.Music;
 
 public class Shooter extends SubsystemBase {
     private static Shooter mInstance;
@@ -39,6 +40,7 @@ public class Shooter extends SubsystemBase {
 
         shootMotorRight = new LoggyTalonFX(Constants.BeltConstants.shootMotorRight, false);
         shootMotorLeft = new LoggyTalonFX(Constants.BeltConstants.shootMotorLeft, false);
+        feedMotor = new LoggyTalonFX(Constants.BeltConstants.feedMotor, false);
 
         TalonFXConfiguration fxConfig = new TalonFXConfiguration();
         fxConfig.CurrentLimits.SupplyCurrentLimit = 30;
@@ -50,16 +52,16 @@ public class Shooter extends SubsystemBase {
         fxConfig.Slot0.kV = 2 / 16;
         fxConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         fxConfig.Feedback.SensorToMechanismRatio = 14 / 20;
+        fxConfig.Audio.AllowMusicDurDisable = true;
         shootMotorLeft.getConfigurator().apply(fxConfig);
         shootMotorRight.getConfigurator().apply(fxConfig);
-
-        feedMotor = new LoggyTalonFX(Constants.BeltConstants.feedMotor, false);
-        feedMotor.setInverted(Constants.BeltConstants.feedIsInverted);
+        feedMotor.getConfigurator().apply(fxConfig);
         
-        feedMotor.setNeutralMode(NeutralModeValue.Coast);
-
+        feedMotor.setInverted(Constants.BeltConstants.feedIsInverted);
         shootMotorRight.setInverted(Constants.BeltConstants.rightShootIsInverted);
         shootMotorLeft.setInverted(Constants.BeltConstants.leftShootIsInverted);
+
+        // Music.getInstance().addFalcon(List.of(shootMotorLeft, shootMotorRight, feedMotor));
 
         SmartDashboard.putNumber("left/setRpm", 1000);
         SmartDashboard.putNumber("right/setRpm", 1000);
@@ -101,11 +103,18 @@ public class Shooter extends SubsystemBase {
     }
 
     public void SetRpm(double left, double right) {
+        // TODO: Are we even going to use this?
         shootMotorRight.setControl(shootPid.withVelocity(right / 60));
         shootMotorLeft.setControl(shootPid.withVelocity(left / 60));
     }
 
-    public void setNeutralMode(NeutralModeValue mode) {
+
+    public void setBrakeMode(boolean brake) {
+        NeutralModeValue mode = NeutralModeValue.Coast;
+        if (brake) {
+            mode = NeutralModeValue.Brake;
+        }
+        
         shootMotorRight.setNeutralMode(mode);
         shootMotorLeft.setNeutralMode(mode);
     }

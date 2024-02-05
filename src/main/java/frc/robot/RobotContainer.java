@@ -9,10 +9,9 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Commands.Shooter.FineAdjust;
-import frc.robot.Commands.Shooter.HoldToPosition;
-import frc.robot.Commands.Shooter.SetPoint;
 import frc.robot.Commands.Shooter.FeedAndShoot;
+import frc.robot.Commands.Shooter.FineAdjust;
+import frc.robot.Commands.Shooter.SetPoint;
 import frc.robot.Subsystems.Shooter.Arm;
 import frc.robot.Subsystems.Shooter.Shooter;
 import frc.robot.Subsystems.Swerve.Swerve;
@@ -65,16 +64,18 @@ public class RobotContainer {
 		// Manip.x().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint));
 
 		Manip.y().whileTrue(new RunCommand(() -> mShooter.SetRpm(SmartDashboard.getNumber("left/setRpm", 0),
-				SmartDashboard.getNumber("right/setRpm", 0))));
+				SmartDashboard.getNumber("right/setRpm", 0)), mShooter).andThen(() -> mShooter.stop(), mShooter));
 
 		Manip.b().whileTrue(new SetPoint(0));
 		Manip.a().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
 
 		Manip.leftBumper().whileTrue(new FeedAndShoot());
 
+		// Manip.leftBumper().whileTrue(new RunCommand(() -> mShooter.loadPiece()));
+
 		mArm.setDefaultCommand(new FineAdjust(() -> -Manip.getRightY()));
 
-		mShooter.setDefaultCommand(new RunCommand(() -> mShooter.stop(), mShooter));
+		// mShooter.setDefaultCommand(new RunCommand(() -> System.out.println("taking shooter thing"), mShooter));
 
 		/* Set Sim Binds */
 		if (Robot.isSimulation()) {
@@ -92,15 +93,15 @@ public class RobotContainer {
 			// new Trigger(() -> simController.getRawButtonPressed(1)).onTrue(drivetrain.applyRequest(() -> brake));
 
 			new Trigger(() -> simController.getRawButtonPressed(1))
-					.whileTrue(new HoldToPosition(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint));
+					.whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint));
 
 			new Trigger(() -> simController.getRawButtonPressed(2))
-					.whileTrue(new HoldToPosition(Constants.ArmConstants.SetPoints.kAmp));
+					.whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kAmp));
 
 			new Trigger(() -> simController.getRawButtonPressed(3))
-					.whileTrue(new HoldToPosition(Constants.ArmConstants.SetPoints.kSpeaker));
+					.whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
 
-			new Trigger(() -> simController.getRawButtonPressed(4)).whileTrue(new HoldToPosition(0));
+			new Trigger(() -> simController.getRawButtonPressed(4)).whileTrue(new SetPoint(0));
 
 			// new Trigger(() -> simController.getRawButtonPressed(2))
 			// 		.onTrue(new InstantCommand(() -> drivetrain.seedFieldRelative()));

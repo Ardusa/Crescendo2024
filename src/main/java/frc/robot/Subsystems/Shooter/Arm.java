@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -21,9 +22,11 @@ import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Custom.LoggyThings.LoggyCANcoder;
 import frc.robot.Custom.LoggyThings.LoggyTalonFX;
+// import frc.robot.Subsystems.Music;
+import frc.robot.Subsystems.Swerve.Swerve;
 
 /**
- * TODO: To zero, first put the arm in a position where the shooter is parallel
+ * To zero: first put the arm in a position where the shooter is parallel
  * to the ground, then, in tuner X, zero the armCoder
  */
 public class Arm extends SubsystemBase {
@@ -59,6 +62,14 @@ public class Arm extends SubsystemBase {
             shooterExtension.setAngle(getShooterExtensionPosition() - 90);
         }
         simShooterExtension.setAngle(targetPosition - 90);
+
+        if (Robot.isReal()) {
+            if (isInRangeOfTarget(shooterExtension.getAngle() - 90 - Constants.ArmConstants.shooterOffset)) {
+                elbowLigament.setColor(new Color8Bit(Color.kGreen));
+            } else {
+                elbowLigament.setColor(new Color8Bit(Color.kWhite));
+            }
+        }
     }
 
     private Arm() {
@@ -89,10 +100,10 @@ public class Arm extends SubsystemBase {
         armMotorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = Units
                 .degreesToRotations(Constants.ArmConstants.kArmMinAngle);
 
-
         MotionMagicConfigs motionMagicConfigs = armMotorConfig.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = 0.25;
         motionMagicConfigs.MotionMagicAcceleration = 0.25;
+        motionMagicConfigs.MotionMagicJerk = 100;
 
         armMotorConfig.Slot0.kV = 05;
         armMotorConfig.Slot0.kP = 100;
@@ -100,9 +111,13 @@ public class Arm extends SubsystemBase {
 
         armMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
+        armMotorConfig.Audio.AllowMusicDurDisable = true;
+
         motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(0);
         motionMagicDutyCycle.Slot = 0;
         armMotor.getConfigurator().apply(armMotorConfig);
+
+        // Music.getInstance().addFalcon(armMotor);
 
         double shooterHeightInches = 22;
         double shooterLengthInches = 9.5;
@@ -114,7 +129,8 @@ public class Arm extends SubsystemBase {
 
         if (Robot.isReal()) {
             /* Motor Profile Mechanism */
-            armMechanism = new Mechanism2d(0.7493 * 2, Units.feetToMeters(3));
+            armMechanism = new Mechanism2d(0.7493 * 2, Units.inchesToMeters(
+                    rootYInches + shooterHeightInches + shooterExtensionInches + shooterLengthInches + 5));
 
             shooterLigament = new MechanismLigament2d("Shooter Bars", Units.inchesToMeters(shooterHeightInches), 90, 9,
                     new Color8Bit(Color.kWhite));
@@ -131,7 +147,8 @@ public class Arm extends SubsystemBase {
         }
 
         /* Create Target Mechanism */
-        simArmMechanism = new Mechanism2d(0.7493 * 2, Units.feetToMeters(3));
+        simArmMechanism = new Mechanism2d(0.7493 * 2, Units
+                .inchesToMeters(rootYInches + shooterHeightInches + shooterExtensionInches + shooterLengthInches + 5));
 
         simShooterLigament = new MechanismLigament2d("Shooter Bars", Units.inchesToMeters(shooterHeightInches), 90, 9,
                 new Color8Bit(Color.kRed));
@@ -145,15 +162,6 @@ public class Arm extends SubsystemBase {
         simArmMechanism.getRoot("Root", Units.inchesToMeters(rootXInches), Units.inchesToMeters(rootYInches))
                 .append(simShooterLigament).append(simShooterExtension).append(simElbowLigament);
         SmartDashboard.putData("Arm Target Profile", simArmMechanism);
-    }
-
-    /** Still need to write code but will aim arm at the slot using vision */
-    public double aim() {
-        return Constants.ArmConstants.SetPoints.kSpeaker;
-        /* TODO: Set up an algorithm to aim for slot/apriltag */
-        /*
-         * look into this new ArmFeedforward(0, 0, 0).
-         */
     }
 
     /**
@@ -224,7 +232,7 @@ public class Arm extends SubsystemBase {
      */
     public double getArmPosition() {
         if (Robot.isSimulation()) {
-            return simShooterExtension.getAngle();
+            return simShooterExtension.getAngle() - Constants.ArmConstants.shooterOffset + 90;
         }
         return Units.rotationsToDegrees(armMotor.getPosition().getValueAsDouble());
     }
@@ -255,6 +263,31 @@ public class Arm extends SubsystemBase {
     }
 
     public void setMotionMagic(double position) {
+        // TODO: Get this to work (PID tuning)
         armMotor.setControl(motionMagicDutyCycle.withPosition(position));
+    }
+
+    public double calculateArmSetpoint() {
+        /* Swerve Pose calculated in meters */
+        double returnVal = 0;
+        double fieldLength = Constants.fieldLength;
+        Pose2d currentPose = Swerve.getInstance().getPose();
+        double distToSpeaker = Math.sqrt(Math.pow(currentPose.getX(), 2) + Math.pow(currentPose.getY(), 2));
+
+        /* Algorithm to calculate arm setpoint */
+        System.out.println("Distance to speaker" + distToSpeaker);
+        if (distToSpeaker < fieldLength / 5) { // 10% of the field length
+            returnVal = Constants.ArmConstants.SetPoints.kSpeakerClosestPoint;
+        } else {
+            returnVal = Constants.ArmConstants.SetPoints.kHorizontal;
+        }
+
+        /* Make sure that we dont accidentally return a stupid value */
+        if (validSetpoint(returnVal)) {
+            return returnVal;
+        } else {
+            System.out.println(returnVal + " is not a valid setpoint");
+            return getArmPosition();
+        }
     }
 }

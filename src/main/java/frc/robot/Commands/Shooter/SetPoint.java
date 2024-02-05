@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Subsystems.Shooter.Arm;
 
 public class SetPoint extends Command {
@@ -11,7 +12,7 @@ public class SetPoint extends Command {
     private double shooterExtensionSetpoint, armSetpoint;
     private double error = 0;
     private Timer timer;
-    private boolean debugMode = true;
+    private boolean debugMode = false;
 
     /**
      * Set the shooter to a specific position
@@ -40,7 +41,6 @@ public class SetPoint extends Command {
             System.out.println("Shooter position: " + mArm.getArmPosition());
             System.out.println("Shooter target position: " + armSetpoint);
             System.out.println("Error: " + error);
-            // System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
             System.out.println("*************************** Debug Stats (initialize) ***************************\n");
         }
     }
@@ -58,14 +58,18 @@ public class SetPoint extends Command {
             System.out.println("Shooter position: " + mArm.getArmPosition());
             System.out.println("Shooter target position: " + armSetpoint);
             System.out.println("Error: " + error);
-            // System.out.println("Output: " + (error * (rateOfMotion / Constants.ArmConstants.kArmRangeOfMotion)));
             System.out.println("*************************** Debug Stats (execute) ***************************\n");
         }
     }
 
     @Override
     public boolean isFinished() {
-        return mArm.isInRangeOfTarget(armSetpoint);
+        if (Robot.isSimulation()) {
+            return timer.get() > 0.3;
+        } else {
+            return mArm.isInRangeOfTarget(armSetpoint);
+        }
+        // return timer.get() > 0.3;
     }
 
     @Override
@@ -74,6 +78,6 @@ public class SetPoint extends Command {
             SmartDashboard.putNumber("Velocity", 0);
         }
         mArm.stop();
-        System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
+        // System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
     }
 }

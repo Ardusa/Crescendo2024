@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -25,10 +24,12 @@ public class Robot extends TimedRobot {
 	public static Field2d mField = new Field2d();
 
 	public static boolean atComp = false;
+	public static boolean autonomousExited = false;
 
 	@Override
 	public void robotInit() {
-		
+		DataLogManager.start();
+
 		new RobotContainer();
 
 		SmartDashboard.putData("Field", mField);
@@ -40,11 +41,11 @@ public class Robot extends TimedRobot {
 		// Swerve.getInstance().getDaqThread().setThreadPriority(99);
 
 		CommandScheduler.getInstance()
-				.onCommandInitialize((action) -> DataLogManager.log("\n" + action.getName() + " Command Initialized\n"));
+				.onCommandInitialize((action) -> DataLogManager.log(action.getName() + " Command Initialized"));
 		CommandScheduler.getInstance()
-				.onCommandInterrupt((action) -> DataLogManager.log("\n" + action.getName() + " Command Interrupted\n"));
+				.onCommandInterrupt((action) -> DataLogManager.log(action.getName() + " Command Interrupted"));
 		CommandScheduler.getInstance()
-				.onCommandFinish((action) -> DataLogManager.log("\n" + action.getName() + " Command Finished\n"));
+				.onCommandFinish((action) -> DataLogManager.log(action.getName() + " Command Finished"));
 
 		if (Constants.Vision.UseLimelight) {
 			LimelightHelpers.setPipelineIndex(Constants.Vision.llAprilTag, Constants.Vision.llAprilTagPipelineIndex);
@@ -59,6 +60,8 @@ public class Robot extends TimedRobot {
 		DriverStation.silenceJoystickConnectionWarning(true);
 	}
 
+	@SuppressWarnings("unused")
+
 	@Override
 	public void robotPeriodic() {
 		CommandScheduler.getInstance().run();
@@ -71,7 +74,9 @@ public class Robot extends TimedRobot {
 				Swerve.getInstance().addVisionMeasurement(llPose, Timer.getFPGATimestamp());
 			}
 		}
-		PathPlannerCommand.publishTrajectory(mChooser.getSelected());
+		if (!autonomousExited) {
+			PathPlannerCommand.publishTrajectory(mChooser.getSelected());
+		}
 	}
 
 	@Override
@@ -93,12 +98,15 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void autonomousExit() {
-		PathPlannerCommand.unpublishTrajectory();
+		if (atComp) {
+			PathPlannerCommand.unpublishTrajectory();
+			autonomousExited = true;
+		}
 	}
 
 	@Override
 	public void teleopInit() {
-		Shooter.getInstance().setNeutralMode(NeutralModeValue.Coast);
+		Shooter.getInstance().setBrakeMode(false);
 	}
 
 	@Override
@@ -106,7 +114,7 @@ public class Robot extends TimedRobot {
 
 	@Override
 	public void teleopExit() {
-		Shooter.getInstance().setNeutralMode(NeutralModeValue.Brake);
+		Shooter.getInstance().setBrakeMode(true);
 	}
 
 	@Override

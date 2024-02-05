@@ -4,6 +4,11 @@
       "window": {
         "visible": false
       }
+    },
+    "Timing": {
+      "window": {
+        "visible": false
+      }
     }
   },
   "NTProvider": {
@@ -13,6 +18,7 @@
       "/SmartDashboard/Arm Mechanism": "Mechanism2d",
       "/SmartDashboard/Arm Target Mechanism": "Mechanism2d",
       "/SmartDashboard/Arm Target Profile": "Mechanism2d",
+      "/SmartDashboard/Auto": "Command",
       "/SmartDashboard/Auton Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Mechanism": "Mechanism2d",

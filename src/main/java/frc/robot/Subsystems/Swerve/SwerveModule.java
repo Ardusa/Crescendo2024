@@ -6,7 +6,6 @@
  */
 package frc.robot.Subsystems.Swerve;
 
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -34,6 +33,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Custom.LoggyThings.LoggyCANcoder;
 import frc.robot.Custom.LoggyThings.LoggyTalonFX;
+// import frc.robot.Subsystems.Music;
 
 /**
  * Swerve Module class that encapsulates a swerve module powered by CTR
@@ -137,10 +137,14 @@ public class SwerveModule {
         talonConfigs.TorqueCurrent.PeakReverseTorqueCurrent = -constants.SlipCurrent;
         talonConfigs.CurrentLimits.StatorCurrentLimit = constants.SlipCurrent;
         talonConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
+        talonConfigs.Audio.AllowMusicDurDisable = true;
 
         talonConfigs.MotorOutput.Inverted = constants.DriveMotorInverted ? InvertedValue.Clockwise_Positive
                 : InvertedValue.CounterClockwise_Positive;
         StatusCode response = m_driveMotor.getConfigurator().apply(talonConfigs);
+
+        // Music.getInstance().addFalcon(List.of(m_driveMotor, m_steerMotor));
+
         if (!response.isOK()) {
             System.out
                     .println("Talon ID " + constants.DriveMotorId + " failed config with error " + response.toString());
