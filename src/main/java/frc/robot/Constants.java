@@ -310,7 +310,7 @@ public final class Constants {
 
 		public static class SetPoints {
 			public static final double kSpeaker = -30;
-			public static final double kSpeakerClosestPoint = -60;
+			public static final double kSpeakerClosestPoint = -59;
 			public static final double kAmp = 53.75;
 			public static final double kIntake = -50;
 			public static final double kHorizontal = 0;

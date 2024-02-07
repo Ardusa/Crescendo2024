@@ -73,7 +73,7 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putBoolean("Arm/At Setpoint", isInRangeOfTarget(shooterExtensionSetpoint));
 
         // if (Shooter.getInstance().getCurrentCommand() != null) {
-            motionMagicDutyCycle.FeedForward = 8;
+        motionMagicDutyCycle.FeedForward = 8;
         // } else {
         //     motionMagicDutyCycle.FeedForward = 6.1;
         // }
@@ -126,6 +126,8 @@ public class Arm extends SubsystemBase {
         armMotorConfig.Audio.AllowMusicDurDisable = true;
 
         MotionMagicConfigs motionMagicConfigs = armMotorConfig.MotionMagic;
+
+        // TODO: Tune these values
         motionMagicConfigs.MotionMagicCruiseVelocity = 0.25;
         motionMagicConfigs.MotionMagicAcceleration = 0.25;
         motionMagicConfigs.MotionMagicJerk = 100;
@@ -206,7 +208,7 @@ public class Arm extends SubsystemBase {
      * @return true if within range, false if not
      */
     public boolean validSetpoint(double setpoint) {
-        if (setpoint > Constants.ArmConstants.kArmMinAngle && setpoint < Constants.ArmConstants.kArmMaxAngle) {
+        if (setpoint >= Constants.ArmConstants.kArmMinAngle && setpoint <= Constants.ArmConstants.kArmMaxAngle) {
             return true;
         } else {
             return false;
@@ -289,20 +291,34 @@ public class Arm extends SubsystemBase {
     }
 
     public void setMotionMagic(double position) {
-        // TODO: Get this to work (PID tuning)
         motionMagicDutyCycle.Position = Units.degreesToRotations(position);
         // armMotor.setControl(motionMagicDutyCycle);
     }
 
     public double calculateArmSetpoint() {
-        /* Swerve Pose calculated in meters */
-        double returnVal = Constants.ArmConstants.SetPoints.kSpeakerClosestPoint;
         Pose2d currentPose = Swerve.getInstance().getPose();
-        double distToSpeaker = Math.sqrt(Math.pow(currentPose.getX(), 2) + Math.pow(currentPose.getY(), 2));
+
+        double groundToShooterInches = 27;
+        double floorToSpeakerBottomMouthInches = 78;
+        /* ~1.3 meters */
+        double shooterToSpeakerBottomMouthMeters = Units.inchesToMeters(floorToSpeakerBottomMouthInches - groundToShooterInches);
+        /* Swerve Pose calculated in meters */
+
+        /* ~1.24 meters */
+        double distToSpeakerMeters = -Math.sqrt(Math.pow(currentPose.getX(), 2) + Math.pow(currentPose.getY(), 2));
+
+
+
+        double angleToSpeaker = Math.atan2(shooterToSpeakerBottomMouthMeters, distToSpeakerMeters);
+        System.out.println("Angle to speaker atan2: " + angleToSpeaker);
+        angleToSpeaker = 180 - Units.radiansToDegrees(angleToSpeaker);
+        System.out.println("Angle to speaker Radians: " + angleToSpeaker);
+        angleToSpeaker *= -1;
+        System.out.println("Angle to speaker Radians negative: " + angleToSpeaker);
 
         /* TODO: Algorithm to calculate arm setpoint */
         // System.out.println("Distance to speaker" + distToSpeaker);
-        returnVal += distToSpeaker * 3;
+        // returnVal += distToSpeakerMeters * 3;
         // if (distToSpeaker < fieldLength / 5) { // 10% of the field length
         //     returnVal = Constants.ArmConstants.SetPoints.kSpeakerClosestPoint;
         // } else {
@@ -310,11 +326,12 @@ public class Arm extends SubsystemBase {
         // }
 
         /* Make sure that we dont accidentally return a stupid value */
-        if (validSetpoint(returnVal)) {
-            setArmTarget(returnVal);
-            return returnVal;
+        if (validSetpoint(angleToSpeaker)) {
+            setArmTarget(angleToSpeaker);
+            System.out.println("Calculated setpoint: " + angleToSpeaker);
+            return angleToSpeaker;
         } else {
-            System.out.println(returnVal + " is not a valid setpoint");
+            System.out.println(angleToSpeaker + " is not a valid setpoint");
             return getArmPosition();
         }
     }

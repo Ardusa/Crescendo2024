@@ -20,7 +20,7 @@ public class RobotContainer {
 
 	/* Setting up bindings for necessary control of the swerve drive platform */
 	private final CommandXboxController xDrive = new CommandXboxController(0);
-	private final CommandXboxController Manip = new CommandXboxController(1);
+	private final CommandXboxController xManip = new CommandXboxController(1);
 	private final GenericHID simController = new GenericHID(3);
 
 	private final Swerve drivetrain = Swerve.getInstance();
@@ -62,16 +62,18 @@ public class RobotContainer {
 		// Manip.y().whileTrue(new RunCommand(() -> mShooter.SetRpm(SmartDashboard.getNumber("Shooter/left motor/setRpm", 0),
 		// 		SmartDashboard.getNumber("Shooter/right motor/setRpm", 0)), mShooter).andThen(() -> mShooter.stop(), mShooter));
 
-		Manip.b().whileTrue(new SetPoint(0));
-		Manip.a().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
+		xManip.b().whileTrue(new SetPoint(0));
+		xManip.a().whileTrue(new SetPoint(Constants.ArmConstants.SetPoints.kSpeaker));
 
-		Manip.leftBumper().whileTrue(new FeedAndShoot());
+		xManip.leftBumper().whileTrue(new FeedAndShoot());
+
+		xManip.rightBumper().whileTrue(new AimAndShoot());
 
 		// mArm.setDefaultCommand(new AimAndShoot());
 
 		// Manip.leftBumper().whileTrue(new RunCommand(() -> mShooter.loadPiece()));
 
-		mArm.setDefaultCommand(new FineAdjust(() -> -Manip.getRightY()));
+		mArm.setDefaultCommand(new FineAdjust(() -> -xManip.getRightY()));
 
 		// Manip.x().whileTrue(new AimAndShoot());
 

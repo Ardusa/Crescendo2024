@@ -83,7 +83,5 @@ public class SetPoint extends Command {
         if (interrupted) {
             SmartDashboard.putNumber("Arm/Velocity", 0);
         }
-        // mArm.stop();
-        // System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
     }
 }

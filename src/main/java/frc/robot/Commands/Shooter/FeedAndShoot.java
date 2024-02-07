@@ -24,8 +24,9 @@ public class FeedAndShoot extends Command {
 
     @Override
     public void execute() {
+        // TODO: This needs to be figured out, when shooter motors are at full speed, the piece slides out the back
         if (timer.get() < 02) {
-            shooter.shoot(1, 0.0001);
+            shooter.shoot(1, 0.01);
         } else {
             shooter.shoot(1, 1);
         }

@@ -8,7 +8,7 @@ public class AimAndShoot extends Command {
     private Arm mArm;
     private double setpoint;
     private double error = 0;
-    private boolean debugMode = false;
+    private boolean debugMode = true;
 
     public AimAndShoot() {
         mArm = Arm.getInstance();

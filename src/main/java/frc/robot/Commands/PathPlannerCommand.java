@@ -6,12 +6,11 @@ import java.util.List;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
@@ -21,13 +20,11 @@ import frc.robot.Commands.Shooter.FeedAndShoot;
 import frc.robot.Commands.Shooter.SetPoint;
 import frc.robot.Subsystems.Swerve.Swerve;
 
-public class PathPlannerCommand extends Command {
+public class PathPlannerCommand extends SequentialCommandGroup {
     private Swerve swerve;
     private Command auto;
     private Pose2d startPose;
-    private SequentialCommandGroup autoGroup;
     // private boolean debugMode = true;
-    private Timer timer;
 
     private static String lastAutoName;
 
@@ -39,7 +36,6 @@ public class PathPlannerCommand extends Command {
         NamedCommands.registerCommand("Stow", new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.3));
 
         swerve = Swerve.getInstance();
-        timer = new Timer();
 
         try {
             startPose = new Pose2d(PathPlannerAuto.getPathGroupFromAutoFile(autoName).get(0)
@@ -52,38 +48,78 @@ public class PathPlannerCommand extends Command {
             startPose = new Pose2d(2, 4, Rotation2d.fromDegrees(0));
         }
         this.setName(autoName);
-    }
 
-    @Override
-    public void initialize() {
         swerve.seedFieldRelative(startPose);
-        System.out.println("Starting Pose: " + startPose.toString());
-        autoGroup = new SequentialCommandGroup(
-                new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.5),
+
+        this.addCommands(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.5),
                 new FeedAndShoot().withTimeout(0.5),
-                new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5), auto,
-                new InstantCommand(() -> timer.stop()));
-        autoGroup.setName("Autonomous Sequence");
-        timer.restart();
-        autoGroup.schedule();
+                new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5), auto);
+
     }
 
-    @Override
-    public void execute() {
-        NetworkTableInstance.getDefault().getTable("PathPlanner").getEntry("Auto Timer").setDouble(timer.get());
-    }
+    public PathPlannerCommand(String startPosition, long closePieces, long farPieces, boolean shoot) {
+        List<PathPlannerPath> paths = new ArrayList<>();
+        if (shoot) {
+            this.addCommands(new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.5),
+                    new FeedAndShoot().withTimeout(0.5),
+                    new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5));
+        }
 
-    @Override
-    public void end(boolean interrupted) {
-        if (interrupted) {
-            auto.cancel();
+        if (startPosition.equals("left")) {
+            if (closePieces == 1) {
+                paths.add(PathPlannerPath.fromPathFile("start to close left"));
+            }
+
+            if (farPieces == 1) {
+                paths.add(PathPlannerPath.fromPathFile("close left to far left"));
+            }
+
+            if (farPieces == 2) {
+                paths.add(PathPlannerPath.fromPathFile("close left to middle left"));
+            }
+
+        } else if (startPosition.equals("right")) {
+            
+        } else if (startPosition.equals("center")) {
+
+        } else {
+            System.out.println("Invalid start position");
+        }
+
+        for (PathPlannerPath path : paths) {
+            this.addCommands(AutoBuilder.followPathWithEvents(path));
         }
     }
 
-    @Override
-    public boolean isFinished() {
-        return auto.isFinished();
-    }
+    // @Override
+    // public void initialize() {
+    //     System.out.println("Starting Pose: " + startPose.toString());
+    //     autoGroup = new SequentialCommandGroup(
+    //             new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.5),
+    //             new FeedAndShoot().withTimeout(0.5),
+    //             new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.5), auto,
+    //             new InstantCommand(() -> timer.stop()));
+    //     autoGroup.setName("Autonomous Sequence");
+    //     timer.restart();
+    //     autoGroup.schedule();
+    // }
+
+    // @Override
+    // public void execute() {
+    //     NetworkTableInstance.getDefault().getTable("PathPlanner").getEntry("Auto Timer").setDouble(timer.get());
+    // }
+
+    // @Override
+    // public void end(boolean interrupted) {
+    //     if (interrupted) {
+    //         auto.cancel();
+    //     }
+    // }
+
+    // @Override
+    // public boolean isFinished() {
+    //     return auto.isFinished();
+    // }
 
     public static void publishTrajectory(String autoName) {
         if (autoName.equals(lastAutoName)) {
