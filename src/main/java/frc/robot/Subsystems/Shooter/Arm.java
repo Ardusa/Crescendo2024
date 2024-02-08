@@ -4,10 +4,10 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicTorqueCurrentFOC;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
@@ -37,7 +37,6 @@ public class Arm extends SubsystemBase {
     private LoggyCANcoder armCoder;
     private double shooterExtensionSetpoint = 0;
 
-    private VelocityDutyCycle velocityDutyCycle;
     private MotionMagicTorqueCurrentFOC motionMagicDutyCycle;
 
     private Mechanism2d armMechanism;
@@ -72,17 +71,19 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putNumber("Arm/Arm Position", getArmPosition());
         SmartDashboard.putBoolean("Arm/At Setpoint", isInRangeOfTarget(shooterExtensionSetpoint));
 
-        // if (Shooter.getInstance().getCurrentCommand() != null) {
-            motionMagicDutyCycle.FeedForward = 8;
-        // } else {
-        //     motionMagicDutyCycle.FeedForward = 6.1;
-        // }
+        if (Shooter.getInstance().getCurrentCommand() == null) {
+            motionMagicDutyCycle.FeedForward = Constants.ArmConstants.kFeedForwardTorqueCurrent;
+        } else {
+            motionMagicDutyCycle.FeedForward = Constants.ArmConstants.kFeedForwardTorqueCurrentWhileShooting;
+        }
 
         if (!(this.getCurrentCommand() instanceof SetPoint)) {
             motionMagicDutyCycle.Position = Units.degreesToRotations(getArmPosition());
         }
 
-        armMotor.setControl(motionMagicDutyCycle.withFeedForward(6.04));
+        armMotor.setControl(motionMagicDutyCycle);
+
+        // SmartDashboard.putData(this);
     }
 
     private Arm() {
@@ -123,11 +124,15 @@ public class Arm extends SubsystemBase {
 
         armMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
+        armMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
         armMotorConfig.Audio.AllowMusicDurDisable = true;
 
         MotionMagicConfigs motionMagicConfigs = armMotorConfig.MotionMagic;
+        /* TODO: Increase these values */
         motionMagicConfigs.MotionMagicCruiseVelocity = 0.25;
         motionMagicConfigs.MotionMagicAcceleration = 0.25;
+        /* TODO: Adjust to get trapezoidal formation */
         motionMagicConfigs.MotionMagicJerk = 100;
 
         armMotor.getConfigurator().apply(armMotorConfig);
@@ -143,7 +148,7 @@ public class Arm extends SubsystemBase {
         double rootYInches = 4;
 
         if (Robot.isReal()) {
-            /* Motor Profile Mechanism */
+            /* Create Motor Profile Mechanism */
             armMechanism = new Mechanism2d(0.7493 * 2, Units.inchesToMeters(
                     rootYInches + shooterHeightInches + shooterExtensionInches + shooterLengthInches + 5));
 
@@ -178,8 +183,7 @@ public class Arm extends SubsystemBase {
                 .append(simShooterLigament).append(simShooterExtension).append(simElbowLigament);
         SmartDashboard.putData("Arm/Target Profile", simArmMechanism);
 
-        // setPoint = getArmPosition();
-        motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(getArmPosition());
+        motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(-Constants.ArmConstants.shooterOffset);
         motionMagicDutyCycle.Slot = 0;
 
     }
@@ -242,10 +246,6 @@ public class Arm extends SubsystemBase {
         armMotor.set(setVal);
     }
 
-    public void aimVelocity(double velocity) {
-        armMotor.setControl(velocityDutyCycle.withVelocity(velocity));
-    }
-
     /**
      * Returns the position of the arm in degrees
      * 
@@ -263,8 +263,7 @@ public class Arm extends SubsystemBase {
     }
 
     public void stop() {
-        armMotor.setControl(motionMagicDutyCycle.withFeedForward(0).withPosition(getArmPosition()));
-        // armMotor.set(0);
+        setMotionMagic(getArmPosition());
     }
 
     /**
@@ -281,9 +280,9 @@ public class Arm extends SubsystemBase {
     }
 
     public double getVelocity() {
-        // if (Robot.isSimulation()) {
-        //     return 0;
-        // }
+        if (Robot.isSimulation()) {
+            return 0;
+        }
 
         return armMotor.getVelocity().getValueAsDouble() * 360;
     }
@@ -291,7 +290,6 @@ public class Arm extends SubsystemBase {
     public void setMotionMagic(double position) {
         // TODO: Get this to work (PID tuning)
         motionMagicDutyCycle.Position = Units.degreesToRotations(position);
-        // armMotor.setControl(motionMagicDutyCycle);
     }
 
     public double calculateArmSetpoint() {

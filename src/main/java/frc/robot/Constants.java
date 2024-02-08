@@ -271,33 +271,33 @@ public final class Constants {
 		public static final double rotationalDeadband = SwerveConstants.kMaxAngularSpeedMetersPerSecond * 0.05;
 	}
 
-	public static class BeltConstants {
+	public static class ShooterConstants {
 		public static final int feedMotor = 60;
 		public static final int shootMotorLeft = 51;
 		public static final int shootMotorRight = 52;
 		public static final boolean feedIsInverted = true;
-		public static final boolean rightShootIsInverted = false;
-		public static final boolean leftShootIsInverted = true;
+		public static final boolean rightShootIsInverted = true;
+		public static final boolean leftShootIsInverted = false;
 		public static final boolean intakeIsPositive = true;
 
-		public static final double kBeltSpeedSpeaker = 0.1;
-		public static final double kBeltSpeedAmp = 0.2;
-		public static final double kBeltIntakeSpeed = 0.2;
+		public static final double kShootSpeedSpeaker = 0.1;
+		public static final double kShootSpeedAmp = 0.2;
+		public static final double kSourceIntakeSpeed = 0.2;
 
-		public static final double kBeltVelocitySpeaker = 1;
-		public static final double kBeltVelocityAmp = 0.2;
-		public static final double kBeltIntakeVelocityMax = 94;
-		public static final double kBeltIntakeVelocity20Percent = 94 * 0.2;
-		public static final double kBeltFeedForward = 0.01;
-
-		public static final double beltBufferVelocity = 10;
+		public static final double kFeederFeedForward = 0.01;
+		public static final double shooterChargeUpTime = 0.3;
 	}
 
 	public static class ArmConstants {
 		public static final int armMotorID = 53;
+		public static final boolean armMotorInverted = true;
+
 		public static final int armEncoderID = 50;
 
-		public static final double kFeedForward = 0.025;
+		public static final double kFeedForwardDutyCycle = 0.025;
+		public static final double kFeedForwardTorqueCurrent = 6.04;
+		public static final double kFeedForwardTorqueCurrentWhileShooting = 8;
+
 
 		/** 100 degrees */
 		public static final double kArmMaxAngle = 60;

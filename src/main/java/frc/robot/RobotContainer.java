@@ -3,10 +3,9 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
 import frc.robot.Commands.Shooter.AimAndShoot;
 import frc.robot.Commands.Shooter.FeedAndShoot;
 import frc.robot.Commands.Shooter.FineAdjust;
@@ -17,8 +16,6 @@ import frc.robot.Subsystems.Swerve.SwerveRequest;
 import frc.robot.Subsystems.Swerve.SwerveModule.DriveRequestType;
 
 public class RobotContainer {
-
-	/* Setting up bindings for necessary control of the swerve drive platform */
 	private final CommandXboxController xDrive = new CommandXboxController(0);
 	private final CommandXboxController Manip = new CommandXboxController(1);
 	private final GenericHID simController = new GenericHID(3);
@@ -73,7 +70,7 @@ public class RobotContainer {
 
 		mArm.setDefaultCommand(new FineAdjust(() -> -Manip.getRightY()));
 
-		// Manip.x().whileTrue(new AimAndShoot());
+		Manip.x().whileTrue(new AimAndShoot());
 
 		// mShooter.setDefaultCommand(new RunCommand(() -> System.out.println("taking shooter thing"), mShooter));
 
@@ -126,10 +123,5 @@ public class RobotContainer {
 		field = Robot.mField;
 		drivetrain.registerTelemetry((telemetry) -> logger.telemeterize(telemetry));
 		configureBindings();
-	}
-
-	public Command getAutonomousCommand() {
-		/* First put the drivetrain into auto run mode, then run the auto */
-		return new PrintCommand("No auto loaded");
 	}
 }

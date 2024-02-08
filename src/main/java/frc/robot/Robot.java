@@ -74,9 +74,9 @@ public class Robot extends TimedRobot {
 				Swerve.getInstance().addVisionMeasurement(llPose, Timer.getFPGATimestamp());
 			}
 		}
-		if (!autonomousExited) {
-			PathPlannerCommand.publishTrajectory(mChooser.getSelected());
-		}
+		// if (!autonomousExited) {
+		// 	PathPlannerCommand.publishTrajectory(mChooser.getSelected());
+		// }
 	}
 
 	@Override

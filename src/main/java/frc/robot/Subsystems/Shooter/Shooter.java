@@ -41,11 +41,11 @@ public class Shooter extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/left motor/setRpm", 1000);
         SmartDashboard.putNumber("Shooter/right motor/setRpm", 1000);
 
-        holding = false;
+        holding = true;
 
-        shootMotorRight = new LoggyTalonFX(Constants.BeltConstants.shootMotorRight, false);
-        shootMotorLeft = new LoggyTalonFX(Constants.BeltConstants.shootMotorLeft, false);
-        feedMotor = new LoggyTalonFX(Constants.BeltConstants.feedMotor, false);
+        shootMotorRight = new LoggyTalonFX(Constants.ShooterConstants.shootMotorRight, false);
+        shootMotorLeft = new LoggyTalonFX(Constants.ShooterConstants.shootMotorLeft, false);
+        feedMotor = new LoggyTalonFX(Constants.ShooterConstants.feedMotor, false);
 
         TalonFXConfiguration fxConfig = new TalonFXConfiguration();
         fxConfig.CurrentLimits.SupplyCurrentLimit = 30;
@@ -62,9 +62,9 @@ public class Shooter extends SubsystemBase {
         shootMotorRight.getConfigurator().apply(fxConfig);
         feedMotor.getConfigurator().apply(fxConfig);
         
-        feedMotor.setInverted(Constants.BeltConstants.feedIsInverted);
-        shootMotorRight.setInverted(Constants.BeltConstants.rightShootIsInverted);
-        shootMotorLeft.setInverted(Constants.BeltConstants.leftShootIsInverted);
+        feedMotor.setInverted(Constants.ShooterConstants.feedIsInverted);
+        shootMotorRight.setInverted(Constants.ShooterConstants.rightShootIsInverted);
+        shootMotorLeft.setInverted(Constants.ShooterConstants.leftShootIsInverted);
 
         // Music.getInstance().addFalcon(List.of(shootMotorLeft, shootMotorRight, feedMotor));
     }
@@ -93,10 +93,10 @@ public class Shooter extends SubsystemBase {
         return holding;
     }
 
-    public void loadPiece() {
-        feedMotor.set(1);
-    }
-
+    /**
+     * @deprecated idk why we would ever use this
+     * @return whether or not the shoot motor right is below the threshold RPM (1000 RPM)
+     */
     public boolean getSpeedChange() {
         if (shootMotorRight.getVelocity().getValueAsDouble() < Constants.MotorConstants.FalconRotorLoadThresholdRPM) {
             return true;
@@ -105,7 +105,7 @@ public class Shooter extends SubsystemBase {
     }
 
     public void SetRpm(double left, double right) {
-        // TODO: Are we even going to use this?
+        /* TODO: Are we even going to use this? (shootPid) */
         shootMotorRight.setControl(shootPid.withVelocity(right / 60));
         shootMotorLeft.setControl(shootPid.withVelocity(left / 60));
     }

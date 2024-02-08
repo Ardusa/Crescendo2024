@@ -34,7 +34,6 @@ public class PathPlannerCommand extends Command {
     public PathPlannerCommand(String autoName, boolean shoot) {
         NamedCommands.registerCommand("Intake", new PrintCommand("Intake Command, PathPlanner"));
         NamedCommands.registerCommand("Shoot", new PrintCommand("Shoot Command, PathPlanner"));
-        // new SetPoint(Constants.ArmConstants.SetPoints.kSpeakerClosestPoint).withTimeout(0.1));
         NamedCommands.registerCommand("AimAndShoot", new AimAndShoot().withTimeout(0.3));
         NamedCommands.registerCommand("Stow", new SetPoint(Constants.ArmConstants.SetPoints.kIntake).withTimeout(0.3));
 

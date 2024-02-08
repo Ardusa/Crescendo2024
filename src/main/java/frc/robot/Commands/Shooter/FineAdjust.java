@@ -12,7 +12,7 @@ public class FineAdjust extends Command {
 
     public FineAdjust(Supplier<Double> manualAdjust) {
         this.manualAdjust = manualAdjust;
-        this.setName("FineAdjust");
+        this.setName("Fine Adjust");
         this.addRequirements(mArm);
     }
 
