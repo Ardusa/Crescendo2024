@@ -16,7 +16,7 @@ public class AimAndShoot extends Command {
         mArm = Arm.getInstance();
 
         this.setName("Aim and Shoot");
-        // this.addRequirements(mArm);
+        this.addRequirements(mArm);
 
         timer = new Timer();
     }

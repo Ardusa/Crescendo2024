@@ -69,7 +69,7 @@ public class Arm extends SubsystemBase {
         }
 
         SmartDashboard.putNumber("Arm/Arm Position", getArmPosition());
-        SmartDashboard.putBoolean("Arm/At Setpoint", isInRangeOfTarget(shooterExtensionSetpoint));
+        SmartDashboard.putBoolean("Arm/At Setpoint", isInRangeOfTarget(getArmTarget()));
 
         if (Shooter.getInstance().getCurrentCommand() == null) {
             motionMagicDutyCycle.FeedForward = Constants.ArmConstants.kFeedForwardTorqueCurrent;
@@ -183,9 +183,11 @@ public class Arm extends SubsystemBase {
                 .append(simShooterLigament).append(simShooterExtension).append(simElbowLigament);
         SmartDashboard.putData("Arm/Target Profile", simArmMechanism);
 
-        motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(-Constants.ArmConstants.shooterOffset);
+        // motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(0);
+        motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(getArmPosition());
+        // motionMagicDutyCycle = new MotionMagicTorqueCurrentFOC(Units.degreesToRotations(-Constants.ArmConstants.shooterOffset));
         motionMagicDutyCycle.Slot = 0;
-
+        new SetPoint(0).schedule();
     }
 
     /**
@@ -273,6 +275,10 @@ public class Arm extends SubsystemBase {
      */
     public void setArmTarget(double target) {
         shooterExtensionSetpoint = target + Constants.ArmConstants.shooterOffset;
+    }
+
+    public double getArmTarget() {
+        return shooterExtensionSetpoint - Constants.ArmConstants.shooterOffset;
     }
 
     public double getVelocityRotations() {

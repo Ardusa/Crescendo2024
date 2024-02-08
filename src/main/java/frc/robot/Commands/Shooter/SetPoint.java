@@ -42,7 +42,8 @@ public class SetPoint extends Command {
             System.out.println("Error: " + error);
             System.out.println("*************************** Debug Stats (initialize) ***************************\n");
         }
-
+        mArm.setArmTarget(armSetpoint);
+        mArm.setMotionMagic(armSetpoint);
     }
     
     @Override
@@ -50,8 +51,6 @@ public class SetPoint extends Command {
         if (!mArm.validSetpoint(armSetpoint)) {
             this.end(true);
         }
-        mArm.setArmTarget(armSetpoint);
-        mArm.setMotionMagic(armSetpoint);
 
         error = armSetpoint - mArm.getArmPosition();
 
@@ -69,12 +68,13 @@ public class SetPoint extends Command {
 
     @Override
     public boolean isFinished() {
+        return false;
+
         // if (Robot.isSimulation()) {
         //     return timer.get() > 0.3;
         // } else {
         //     return mArm.isInRangeOfTarget(armSetpoint);
         // }
-        return false;
         // return timer.get() > 0.3;
     }
 
@@ -83,7 +83,5 @@ public class SetPoint extends Command {
         if (interrupted) {
             SmartDashboard.putNumber("Arm/Velocity", 0);
         }
-        // mArm.stop();
-        // System.out.println("Shooter position (end of command): " + (mArm.getArmPosition()));
     }
 }

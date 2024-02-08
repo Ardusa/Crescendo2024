@@ -49,6 +49,7 @@ public class FeedAndShoot extends Command {
     @Override
     public boolean isFinished() {
         return !mShooter.getHolding();
+        // return false;
         // return timer.get() > Constants.BeltConstants.shooterChargeUpTime + 0.1;
     }
 }
